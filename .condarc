@@ -1,0 +1,6 @@
+envs_dirs:
+  - /user_data/rhk/_conda_envs
+pkgs_dirs:
+  - /user_data/rhk/_conda_envs/pkgs
+channels:
+  - https://conda.anaconda.org/conda-forge/

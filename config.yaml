@@ -1,0 +1,29 @@
+inputNPfile:
+    - "/user_data/rhk/zymo_hmw_mock/dna_r10.4.1_e8.2_400bps_fast@v4.0.0.fastq"
+    - "/user_data/rhk/zymo_hmw_mock/dna_r10.4.1_e8.2_400bps_hac@v4.0.0.fastq"
+npreads:
+    - 10000
+    - 20000
+reffiles:
+    - B.subtilis_hifiasm
+    - C.neoformans_hifiasm
+    - E.coli_hifiasm
+    - E.faecalis_hifiasm
+    - L.monocytogenes_hifiasm
+    - P.aeruginosa_hifiasm
+    - S.aureus_hifiasm
+    - S.cerevisiae_hifiasm
+    - S.enterica_hifiasm
+asmtypes:
+    - flye
+    - flye.medaka1x
+assembly_threads:
+     20
+polish_threads:
+     20
+assembly_mb:
+     100000
+polish_mb:
+     100000
+medaka_model:
+     "r1041_e82_400bps_sup_g615"
