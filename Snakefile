@@ -2,10 +2,10 @@ configfile: "config.yaml"
 
 rule all:
     input:
-        expand("data/{npID}_NanoPlot-data.tsv.gz", npID=config["inputNPfile"]),
-        expand("data/{npID}.fastq.gz", npID=config["inputNPfile"]),
-        expand("data/{npID}-{nreads}.fastq.gz", npID=config["inputNPfile"], nreads=config["npreads"]),
-        expand("results/{npID}-{nreads}.flye.fa.gz", npID=config["inputNPfile"], nreads=config["npreads"]),
+        expand("temp/{npID}_NanoPlot-data.tsv.gz", npID=config["inputNPfiles"]),
+        expand("data/{npID}.fastq.gz", npID=config["inputNPfiles"]),
+        expand("data/{npID}-{nreads}.fastq.gz", npID=config["inputNPfiles"], nreads=config["npreads"]),
+        expand("results/{npID}-{nreads}.flye.fa.gz", npID=config["inputNPfiles"], nreads=config["npreads"]),
 
 rule get_data:
     input:
@@ -37,7 +37,7 @@ rule getNPsubsets:
 
 rule get_new_refs:
     output:
-        expand("data/hmw_individual/{refID}.fasta", refID=config["newrefs"]),
+        expand("data/hmw_individual/{refID}.fasta", refID=config["reffiles"]),
     threads: 1
     resources:
         mem_mb=10000,
@@ -53,12 +53,12 @@ rule get_new_refs:
         done
         """
 
-rule simplex_NPQC_ref:
+rule NPQC_ref:
     input:
-        NPreads=config["inputNPfile"],
+        NPreads="data/{npID}.fastq.gz",
         ref="data/ref.fasta",
     output:
-        "temp/combined_simplex_NanoPlot-data.tsv.gz"
+        "temp/{npID}_NanoPlot-data.tsv.gz"
     threads: 30
     resources:
         mem_mb=100000,
@@ -68,37 +68,20 @@ rule simplex_NPQC_ref:
         # Run mapping
         minimap2 -ax map-ont --secondary=no -t {threads} {input.ref} {input.NPreads} |\
           samtools view --threads {threads} -Sb -F 0x104 - |\
-          samtools sort -T temp/ --threads {threads} - > temp/np.cov.bam
-        samtools index temp/np.cov.bam
-        bamtools split -in temp/np.cov.bam -reference
-        for f in temp/*REF*bam;
+          samtools sort -T temp/ --threads {threads} - > temp/{wildcards.npID}.cov.bam
+        samtools index temp/{wildcards.npID}.cov.bam
+        bamtools split -in temp/{wildcards.npID}.cov.bam -reference
+        for f in temp/{wildcards.npID}*REF*bam;
             do 
                 NAME=$(echo $f | sed 's/.*REF_//' | sed 's/.bam//')
                 samtools index $f
-                NanoPlot --threads {threads} -o temp/NP_QC_ref/ --no_static --raw --tsv_stats --bam  $f
-                cp temp/NP_QC_ref/NanoPlot-data.tsv.gz temp/simplex_old_ref_$NAME.NanoPlot-data.tsv.gz
-                rm -rf temp/NP_QC_ref/
+                NanoPlot --threads {threads} -o temp/NP_QC_ref_{wildcards.npID}/ --no_static --raw --tsv_stats --bam  $f
+                cp temp/NP_QC_ref_{wildcards.npID}/NanoPlot-data.tsv.gz temp/{wildcards.npID}_ref_$NAME.NanoPlot-data.tsv.gz
+                rm -rf temp/NP_QC_ref_{wildcards.npID}/
                 rm $f
             done
-        cat temp/simplex_old_ref_*.NanoPlot-data.tsv.gz > {output}
+        cat temp/{wildcards.npID}_ref_*.NanoPlot-data.tsv.gz > {output}
         """
-
-rule format_new_ref:
-    output:
-        "data/ref_hifi.fasta",
-    threads: 1
-    resources:
-        mem_mb=1000,
-        node_type="basic",
-    shell:
-        """
-        for f in data/hifirefs/*_hifiasm.fasta ; do
-        ## There is an additional \ to avoid python/snakemake from causing problems https://stackoverflow.com/questions/70324411/snakemake-truncating-shell-codes
-            NAME=$(echo "$f" | sed -E 's/.*\\/(.*).fasta/\\1/');
-            cat $f | sed 's/>/>'"$NAME"'_/' >> {output}
-        done
-        """
-        
 
 rule flye:
     input:
@@ -170,8 +153,8 @@ rule extract_contigs:
 
 rule split_quast_QC:
     input:
-        IDfiles=expand("temp/{npID}.contigIDs.{asmtype}.txt", npID=config["npdatafiles"], asmtype=config["asmtypes"]),
-        genomes=expand("results/{npID}.{asmtype}.fa.gz", npID=config["npdatafiles"], asmtype=config["asmtypes"]),
+        IDfiles=expand("temp/{npID}-{nreads}.contigIDs.{asmtype}.txt", npID=config["inputNPfiles"], nreads=config["npreads"], asmtype=config["asmtypes"]),
+        genomes=expand("results/{npID}-{nreads}.{asmtype}.fa.gz", npID=config["inputNPfiles"], nreads=config["npreads"],asmtype=config["asmtypes"]),
         ref="data/hmw_individual/{refID}.fasta",
     output:
         "results/quast_{refID}.tsv"
@@ -187,8 +170,8 @@ rule split_quast_QC:
 
 rule split_ANI:
     input:
-        expand("temp/{npID}.contigIDs.{asmtype}.txt", npID=config["npdatafiles"], asmtype=config["asmtypes"]),
-        expand("results/{npID}.{asmtype}.fa.gz", npID=config["npdatafiles"], asmtype=config["asmtypes"]),
+        expand("temp/{npID}.contigIDs.{asmtype}.txt", npID=config["inputNPfiles"],nreads=config["npreads"], asmtype=config["asmtypes"]),
+        expand("results/{npID}.{asmtype}.fa.gz", npID=config["inputNPfiles"],nreads=config["npreads"], asmtype=config["asmtypes"]),
         expand("data/hmw_individual/{refID}.fasta", refID=config["reffiles"]),
     output:
         "results/fastani.tsv"
@@ -209,10 +192,7 @@ rule knitRMD:
         "README.Rmd",
         "results/fastani.tsv",
         expand("results/quast_{refID}.tsv", refID=config["reffiles"]),
-        expand("results/{npID}.{asmtype}.fa.gz", npID=config["npdatafiles"], asmtype=config["asmtypes"]),
-        "temp/combined_simplex_NanoPlot-data.tsv.gz",
-        "temp/combined_duplex_NanoPlot-data.tsv.gz",
-        "temp/combined_duplex_new_ref_NanoPlot-data.tsv.gz",
+        expand("results/{npID}-{nreads}.{asmtype}.fa.gz", npID=config["inputNPfiles"], nreads=config["npreads"], asmtype=config["asmtypes"]),
     output:
         "README.md"
     threads: 4
