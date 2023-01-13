@@ -10,231 +10,48 @@ knitr::opts_chunk$set(echo = TRUE)
 options(scipen = 10)
 ```
 
-# R10.4.1 Zymo HMW
+# R10.4.1 Zymo HMW basecalling
 
-## We need new references for the zymo mock
-
-With the release of kit12 and now kit14 it became clear that the reference sequences of the zymo HMW mock needed an update. The original ones were based on an old hybrid assembly with outdated nanopore data and illumine data. Zymo decided to make new assemblies with Pacbio HiFi data as it is generally agreed to be the gold standard for genome assembly. This enables much better benchmarking of new nanopore reads and assemblies as the references are now from an independent sequencing technology and without the homopolymer issues and difficult to polish regions with old hybrid assemblies. 
-
-```{r echo=FALSE,warning=FALSE,message=FALSE}
+```{r load_libraries_and_data,echo=FALSE,warning=FALSE,message=FALSE}
 library(tidyverse)
 library(gridExtra)
 tt2 <- ttheme_default(core=list(fg_params=list(hjust=1, x = 0.95, fontsize = 10)),
                       colhead=list(fg_params=list(fontsize = 12)))
 
-# NP QC
-NP_QC_Escherichia_coli<-read_tsv(file = "temp/simplex_Escherichia_coli_chromosome.NanoPlot-data.tsv.gz",show_col_types = FALSE) %>% mutate(REF="Escherichia_coli")
-NP_QC_Listeria_monocytogenes<-read_tsv(file = "temp/simplex_Listeria_monocytogenes_complete_genome.NanoPlot-data.tsv.gz",show_col_types = FALSE) %>% mutate(REF="Listeria_monocytogenes")
-NP_QC_Pseudomonas_aeruginosa<-read_tsv(file = "temp/simplex_Pseudomonas_aeruginosa_complete_genome.NanoPlot-data.tsv.gz",show_col_types = FALSE) %>% mutate(REF="Pseudomonas_aeruginosa")
-NP_QC_Bacillus_subtilis<-read_tsv(file = "temp/simplex_BS.pilon.polished.v3.ST170922.NanoPlot-data.tsv.gz",show_col_types = FALSE) %>% mutate(REF="Bacillus_subtilis")
-NP_QC_Salmonella_enterica<-read_tsv(file = "temp/simplex_Salmonella_enterica_complete_genome.NanoPlot-data.tsv.gz",show_col_types = FALSE) %>% mutate(REF="Salmonella_enterica")
-NP_QC_Enterococcus_faecalis<-read_tsv(file = "temp/simplex_Enterococcus_faecalis_complete_genome.NanoPlot-data.tsv.gz",show_col_types = FALSE) %>% mutate(REF="Enterococcus_faecalis")
-NP_QC_Staphylococcus_aureus<-read_tsv(file = "temp/simplex_Staphylococcus_aureus_chromosome.NanoPlot-data.tsv.gz",show_col_types = FALSE) %>% mutate(REF="Staphylococcus_aureus")
-NP_REF_QC<-bind_rows(NP_QC_Bacillus_subtilis,
-                     NP_QC_Enterococcus_faecalis,
-                     NP_QC_Escherichia_coli,
-                     NP_QC_Listeria_monocytogenes,
-                     NP_QC_Pseudomonas_aeruginosa,
-                     NP_QC_Salmonella_enterica,
-                     NP_QC_Staphylococcus_aureus)
-# duplex read QC
-duplex_NP_QC_Escherichia_coli<-read_tsv(file = "temp/duplex_Escherichia_coli_chromosome.NanoPlot-data.tsv.gz",show_col_types = FALSE) %>% mutate(REF="Escherichia_coli")
-duplex_NP_QC_Listeria_monocytogenes<-read_tsv(file = "temp/duplex_Listeria_monocytogenes_complete_genome.NanoPlot-data.tsv.gz",show_col_types = FALSE) %>% mutate(REF="Listeria_monocytogenes")
-duplex_NP_QC_Pseudomonas_aeruginosa<-read_tsv(file = "temp/duplex_Pseudomonas_aeruginosa_complete_genome.NanoPlot-data.tsv.gz",show_col_types = FALSE) %>% mutate(REF="Pseudomonas_aeruginosa")
-duplex_NP_QC_Bacillus_subtilis<-read_tsv(file = "temp/duplex_BS.pilon.polished.v3.ST170922.NanoPlot-data.tsv.gz",show_col_types = FALSE) %>% mutate(REF="Bacillus_subtilis")
-duplex_NP_QC_Salmonella_enterica<-read_tsv(file = "temp/duplex_Salmonella_enterica_complete_genome.NanoPlot-data.tsv.gz",show_col_types = FALSE) %>% mutate(REF="Salmonella_enterica")
-duplex_NP_QC_Enterococcus_faecalis<-read_tsv(file = "temp/duplex_Enterococcus_faecalis_complete_genome.NanoPlot-data.tsv.gz",show_col_types = FALSE) %>% mutate(REF="Enterococcus_faecalis")
-duplex_NP_QC_Staphylococcus_aureus<-read_tsv(file = "temp/duplex_Staphylococcus_aureus_chromosome.NanoPlot-data.tsv.gz",show_col_types = FALSE) %>% mutate(REF="Staphylococcus_aureus")
-duplex_NP_REF_QC<-bind_rows(duplex_NP_QC_Bacillus_subtilis,
-                     duplex_NP_QC_Enterococcus_faecalis,
-                     duplex_NP_QC_Escherichia_coli,
-                     duplex_NP_QC_Listeria_monocytogenes,
-                     duplex_NP_QC_Pseudomonas_aeruginosa,
-                     duplex_NP_QC_Salmonella_enterica,
-                     duplex_NP_QC_Staphylococcus_aureus)
-
 # duplex read QC new ref
-files<-dir(pattern = "duplex_new_ref_E.coli_hifiasm_.*.NanoPlot-data.tsv.gz",path = "temp/",full.names = T)
-duplex_NP_QC_new_ref_Escherichia_coli <- files %>% map(read_tsv) %>% reduce(rbind) %>% mutate(REF="Escherichia_coli")
-files<-dir(pattern = "duplex_new_ref_L.monocytogenes_hifiasm_.*.NanoPlot-data.tsv.gz",path = "temp/",full.names = T)
-duplex_NP_QC_new_ref_Listeria_monocytogenes<-files %>% map(read_tsv) %>% reduce(rbind) %>% mutate(REF="Listeria_monocytogenes")
-files<-dir(pattern = "duplex_new_ref_P.aeruginosa_hifiasm_.*.NanoPlot-data.tsv.gz",path = "temp/",full.names = T)
-duplex_NP_QC_new_ref_Pseudomonas_aeruginosa<- files %>% map(read_tsv) %>% reduce(rbind) %>% mutate(REF="Pseudomonas_aeruginosa")
-files<-dir(pattern = "duplex_new_ref_B.subtilis_hifiasm_.*.NanoPlot-data.tsv.gz",path = "temp/",full.names = T)
-duplex_NP_QC_new_ref_Bacillus_subtilis<- files %>% map(read_tsv) %>% reduce(rbind) %>% mutate(REF="Bacillus_subtilis")
-files<-dir(pattern = "duplex_new_ref_S.enterica_hifiasm_.*.NanoPlot-data.tsv.gz",path = "temp/",full.names = T)
-duplex_NP_QC_new_ref_Salmonella_enterica<-files %>% map(read_tsv) %>% reduce(rbind) %>% mutate(REF="Salmonella_enterica")
-files<-dir(pattern = "duplex_new_ref_E.faecalis_hifiasm_.*.NanoPlot-data.tsv.gz",path = "temp/",full.names = T)
-duplex_NP_QC_new_ref_Enterococcus_faecalis<-files %>% map(read_tsv) %>% reduce(rbind) %>% mutate(REF="Enterococcus_faecalis")
-files<-dir(pattern = "duplex_new_ref_S.aureus_hifiasm_.*.NanoPlot-data.tsv.gz",path = "temp/",full.names = T)
-duplex_NP_QC_new_ref_Staphylococcus_aureus<-files %>% map(read_tsv) %>% reduce(rbind) %>% mutate(REF="Staphylococcus_aureus")
-duplex_NP_REF_QC_new_ref<-bind_rows(duplex_NP_QC_new_ref_Bacillus_subtilis,
-                     duplex_NP_QC_new_ref_Enterococcus_faecalis,
-                     duplex_NP_QC_new_ref_Escherichia_coli,
-                     duplex_NP_QC_new_ref_Listeria_monocytogenes,
-                     duplex_NP_QC_new_ref_Pseudomonas_aeruginosa,
-                     duplex_NP_QC_new_ref_Salmonella_enterica,
-                     duplex_NP_QC_new_ref_Staphylococcus_aureus)
-
-
-### read coverage
-draft_assemblies<-list.files(path = "results/",pattern = "*.assembly_info.txt",full.names = T)
-cov_tab<-tibble()
-for (f in draft_assemblies) {
-  cov_temp<-read_tsv(file = f) %>% mutate(draft=f)
-  cov_tab<-bind_rows(cov_tab,cov_temp)
+get_read_QC<-function(model="dna_r10.4.1_e8.2_400bps_hac@v4.0.0") {
+  files<-dir(pattern = paste0(model,"_ref_E.coli_.*.NanoPlot-data.tsv.gz"),path = "temp/",full.names = T)
+  NP_QC_ref_Escherichia_coli <- files %>% map(read_tsv) %>% reduce(rbind) %>% mutate(REF="Escherichia_coli")
+  files<-dir(pattern = paste0(model,"_ref_L.monocytogenes_.*.NanoPlot-data.tsv.gz"),path = "temp/",full.names = T)
+  NP_QC_ref_Listeria_monocytogenes<-files %>% map(read_tsv) %>% reduce(rbind) %>% mutate(REF="Listeria_monocytogenes")
+  files<-dir(pattern = paste0(model,"_ref_P.aeruginosa_.*.NanoPlot-data.tsv.gz"),path = "temp/",full.names = T)
+  NP_QC_ref_Pseudomonas_aeruginosa<- files %>% map(read_tsv) %>% reduce(rbind) %>% mutate(REF="Pseudomonas_aeruginosa")
+  files<-dir(pattern = paste0(model,"_ref_B.subtilis_.*.NanoPlot-data.tsv.gz"),path = "temp/",full.names = T)
+  NP_QC_ref_Bacillus_subtilis<- files %>% map(read_tsv) %>% reduce(rbind) %>% mutate(REF="Bacillus_subtilis")
+  files<-dir(pattern = paste0(model,"_ref_S.enterica_.*.NanoPlot-data.tsv.gz"),path = "temp/",full.names = T)
+  NP_QC_ref_Salmonella_enterica<-files %>% map(read_tsv) %>% reduce(rbind) %>% mutate(REF="Salmonella_enterica")
+  files<-dir(pattern = paste0(model,"_ref_E.faecalis_.*.NanoPlot-data.tsv.gz"),path = "temp/",full.names = T)
+  NP_QC_ref_Enterococcus_faecalis<-files %>% map(read_tsv) %>% reduce(rbind) %>% mutate(REF="Enterococcus_faecalis")
+  files<-dir(pattern = paste0(model,"_ref_S.aureus_.*.NanoPlot-data.tsv.gz"),path = "temp/",full.names = T)
+  NP_QC_ref_Staphylococcus_aureus<-files %>% map(read_tsv) %>% reduce(rbind) %>% mutate(REF="Staphylococcus_aureus")
+  NP_QC_combined<-bind_rows(NP_QC_ref_Bacillus_subtilis,
+                            NP_QC_ref_Enterococcus_faecalis,
+                            NP_QC_ref_Escherichia_coli,
+                            NP_QC_ref_Listeria_monocytogenes,
+                            NP_QC_ref_Pseudomonas_aeruginosa,
+                            NP_QC_ref_Salmonella_enterica,
+                            NP_QC_ref_Staphylococcus_aureus) %>% 
+    mutate(model=model)
+return(NP_QC_combined)
 }
-cov_tab<-cov_tab %>% mutate(contigName=`#seq_name`,coverage=cov.,circular=circ.,
-                            ReadSet=str_replace(string =draft,pattern = ".*(r1041_e82_400bps_sup_g634_.*).assembly_info.txt",replacement = "\\1")) %>% 
-  select(ReadSet,contigName,coverage,circular)
-
-fastani<-read_tsv(file = "results/fastani.tsv",col_names = c("query","ref","ANI","aligned_segments","total_segments")) %>% 
-  mutate(Assembly=str_replace(string = query,pattern = "results/bins/(.*).fa.*",replacement = "\\1"),
-         ref=str_replace(string = ref,pattern = ".*/(.*).fasta",replacement = "\\1")) %>% mutate(Assembly=str_replace_all(string = Assembly,pattern = "-",replacement = "_")) %>%
-  mutate(Assembly=str_replace(string = Assembly,pattern = "simplex_",replacement = "simplex-"))
-ref_genomes=list.files(path = "results/",pattern = "quast_.*.tsv",full.names = T)
-
-# Load quast data
-quast_tab<-tibble()
-for (f in ref_genomes) {
-  quast_temp<-read_tsv(file = f) %>% mutate(ref=f) %>% filter(`Total aligned length`!="-")
-  quast_tab<-bind_rows(quast_tab,quast_temp)
-}
-quast_tab<-quast_tab %>% mutate(ref=str_replace(string = ref,pattern = ".*quast_(.*).tsv",replacement = "\\1"),
-                                Assembly=str_trim(Assembly)) %>% filter(as.numeric(`Total aligned length`)>10^6) %>%
-  select(Assembly,ref,`Total length`,`Reference length`,`Largest alignment`,`Total aligned length`,`# indels per 100 kbp`,`# mismatches per 100 kbp`) %>%
-  mutate(`Total aligned length`=as.numeric(`Total aligned length`),
-         `# indels per 100 kbp`=as.numeric(`# indels per 100 kbp`),
-         `# mismatches per 100 kbp`=as.numeric(`# mismatches per 100 kbp`))
-
-###
-sometab<-fastani %>% select(Assembly,ref,ANI) %>% right_join(quast_tab,by = c("Assembly", "ref")) %>%
-  mutate(contigName=str_replace(string = Assembly,pattern = ".*(contig.*)",replacement = "\\1"),
-         ReadSet=str_replace(string = Assembly,pattern = "(r1041.*).flye.*",replacement = "\\1")) %>%
-  filter(ANI>95) %>%
-  left_join(cov_tab,by = c("contigName", "ReadSet")) %>%
-  mutate(ref=str_replace(string = ref,pattern = "_complete.*","")) %>%
-  mutate(asmtype=str_replace(string = Assembly,pattern = ".*(fly.*).contig.*",replacement = "\\1"))
+NP_QC_fast<-get_read_QC(model = "dna_r10.4.1_e8.2_400bps_fast@v4.0.0")
+NP_QC_hac<-get_read_QC(model = "dna_r10.4.1_e8.2_400bps_hac@v4.0.0")
+NP_QC_combined<-bind_rows(NP_QC_fast,NP_QC_hac)
 ```
 
-## NP simplex reads aligned to the refs
-
-The read accuracy was generally pretty amazing with modal accuracy >98.5 % across the 7 different bacteria.
+## NP reads aligned to the refs
 
 ```{r fig.width=10,fig.height=7,echo=FALSE,warning=FALSE,message=FALSE}
-NP_REF_QC %>% ggplot(aes(x = percentIdentity,col=REF))+geom_density()+geom_vline(xintercept = 99,col="red",linetype="dashed")+scale_x_continuous(breaks = 90:100,limits = c(90,100))
-```
-
-## NP duplex reads aligned to the refs (phred scale)
-
-```{r fig.width=10,fig.height=7,echo=FALSE,warning=FALSE,message=FALSE}
-duplex_NP_REF_QC_new_ref %>% 
-  mutate(Phred=-10*log10(1-percentIdentity/100)) %>%
-  ggplot(aes(x = Phred,col=REF))+geom_density()+geom_vline(xintercept = 20,col="red",linetype="dashed")
-```
-
-
-## Duplex genome stats
-
-Despite the duplex reads having very high identity scores the resulting assemblies did still have very high mismatch rates when comparing to the old references. However, this seems to be much improved with the new hifi based references.
-
-```{r echo=FALSE, message=FALSE,warning=FALSE, fig.width=17,fig.height=9,results="asis",eval=TRUE,results='hide'}
-genometable<-sometab %>% select(Assembly,coverage,ref,ANI,`Largest alignment`,`Total aligned length`,`Reference length`,`# mismatches per 100 kbp`,`# indels per 100 kbp`) %>%
-  mutate(`# mismatches`=round(as.numeric(`# mismatches per 100 kbp`)*as.numeric(`Reference length`)/10^5)) %>%
-  mutate(`# indels`=round(as.numeric(`# indels per 100 kbp`)*as.numeric(`Reference length`)/10^5)) %>%
-  mutate(contig=str_replace(string = Assembly,pattern = ".*contig(.*)",replacement = "contig_\\1"),
-         asmtype=str_replace(string = Assembly,pattern = ".*g634_(.*).contig.*",replacement = "\\1")) %>%
-  select(contig,asmtype,everything()) %>%
-  arrange(contig,`# indels`) %>%
-  select(-Assembly) %>%
-  filter(str_detect(string = ref,pattern = "cerevi",negate = T ))
-
-MOD_genometable<-genometable %>% filter(str_detect(string = asmtype,pattern = "duplex")) %>%
-        filter(str_detect(string = ref, pattern = "hififlye",negate = T)) %>% 
-        mutate(ref=case_when(str_detect(string=ref,pattern="hifi")~ref,
-                             TRUE~paste0(ref,"-old"))) %>%
-        mutate(ref=str_replace(string=ref,pattern="(^[A-Z])[a-z]+_([a-z]+-old)",replacement="\\1.\\2")) %>% 
-        mutate(ref=str_replace(string=ref,pattern="_hifiasm",replacement="-new"))
-
-colnames(MOD_genometable) <- sapply(names(MOD_genometable), function(x) paste(strwrap(x, width = 10),  collapse="\n"))
-print(MOD_genometable %>% 
-        grid.table(theme = tt2,rows = NULL))
-```
-
-## Mismatches old vs new reference
-
-In general the new assemblies have a notable reduction in the number of mismatches. All but B. subtilis achieve less than 20 mismatches!!!. B. subtilis seems to be having a slightly higher mismatch rate with the new reference. Generally 1 round of medaka seems to improve the mismatch rates. 
-
-```{r echo=FALSE, message=FALSE,warning=FALSE, fig.width=10,fig.height=5}
-duplex_genometable<-genometable %>%
-  filter(str_detect(string = ref,pattern = "hififlye",negate = T)) %>%
-  mutate(reftype=case_when(str_detect(string = ref,pattern = "hifiasm")~"new",
-                           TRUE~"old")) %>%
-  filter(str_detect(string = asmtype,pattern = "simplex",negate = T)) %>% 
-  mutate(refname=str_replace(string = ref,pattern = "_hifiasm",replacement = "")) %>%
-  mutate(refname=str_replace(string = refname,pattern = "(^[A-Z])[a-z]+_(.*)",replacement = "\\1.\\2"))
-duplex_genometable %>%
-  ggplot(aes(y = refname,x = `# mismatches`,col=reftype,shape=asmtype))+geom_point()+ theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+scale_x_log10(breaks=c(1,10,20,30,50,100,500))
-```
-
-## Indels old vs new reference
-
-All genomes show a notable improve regarding the number of indel errors with the new references. All of them achieve 20 indels or less for the entire genome!!! 
-
-```{r echo=FALSE, message=FALSE,warning=FALSE, fig.width=10,fig.height=5}
-duplex_genometable %>%
-  ggplot(aes(y = refname,x = `# indels`,col=reftype,shape=asmtype))+geom_point()+scale_x_continuous(breaks=seq(from=0,to=100,by=10))
-```
-
-
-## Indel rate vs coverage
-
-In general the new references have better indel rates. It seems that 30-40x coverage is enough to get the best possible rates.
-
-```{r fig.width=10, echo=FALSE,warning=FALSE,message=FALSE}
-sometab %>% 
-  mutate(ref=str_replace(string = ref,pattern = "(^[A-Z])[a-z]+_(.*)",replacement = "\\1.\\2-old")) %>%
-  filter(str_detect(string = ref,pattern = "cerevi",negate = T )) %>%
-  filter(str_detect(string = ref,pattern = "hififlye",negate = T )) %>%
-  mutate(readtype=str_replace(string = Assembly,pattern = ".*_([a-z]+plex).*",replacement = "\\1")) %>%
-  ggplot(aes(x = as.numeric(coverage),col=asmtype,shape=readtype,y = `# indels per 100 kbp`))+geom_line()+scale_y_log10()+xlab("Coverage")+facet_wrap(~ref)+geom_point()+scale_x_log10(breaks=c(10,30,100,1000))
-```
-
-## Mismatch rate vs coverage
-
-In general the new references have better mismatch rates. It seems that 30-40x coverage is enough to get the best possible rates.
-
-```{r fig.width=10, echo=FALSE,warning=FALSE,message=FALSE}
-sometab %>% 
-  mutate(ref=str_replace(string = ref,pattern = "(^[A-Z])[a-z]+_(.*)",replacement = "\\1.\\2-old")) %>%
-  filter(str_detect(string = ref,pattern = "cerevi",negate = T )) %>%
-  filter(str_detect(string = ref,pattern = "hififlye",negate = T )) %>%
-  mutate(readtype=str_replace(string = Assembly,pattern = ".*_([a-z]+plex).*",replacement = "\\1")) %>%
-  ggplot(aes(x = as.numeric(coverage),col=asmtype,shape=readtype,y = `# mismatches per 100 kbp`))+geom_line()+scale_y_log10()+xlab("Coverage")+facet_wrap(~ref)+geom_point()+scale_x_log10(breaks=c(10,30,100,1000))
-```
-
-## Conclusion
-
-In general the new hifi based references are much better aligned with the nanopore assemblies than the current public version. It is really great to see that independent DNA sequencing technologies and assemblers produce near identical assemblies. There does not appear to be any massive improvement for duplex based assembly when running medaka.
-
-## Materials and methods
-
-### DNA sequencing
-ZymoBIOMICS HMW DNA Standard was sequenced using the SQK-LSK114 kit on a Nanopore Promethion flowcell FLO-PRO114M at 400 bp/s. The reads were basecalled using guppy (v. 6.3.4) using the super accuracy model for both simplex and duplex reads. 
-
-### Read QC
-The reads were aligned to the "old" zymo hmw references using minimap2 (v. 2.24) and the identity scores were extracted using NanoPlot (v. 1.40.2).
-
-### Metagenome assemblye
-The reads were subsampled using seqtk (v. 1.3) and assembled using flye (v. 2.9.1) and polished using medaka (V. 1.7.2). 
-
-### Genome QC
-The assemblies were compared to the old and new references using QUAST (v. 5.2.0), and fastANI (v. 1.33). 
-
-
-## My computer
-
-```{r message=FALSE, echo=FALSE,warning=FALSE}
-sessionInfo()
+NP_QC_combined %>% ggplot(aes(x = percentIdentity,col=REF))+geom_density()+geom_vline(xintercept = 99,col="red",linetype="dashed")+scale_x_continuous(breaks = 90:100,limits = c(90,100))+facet_wrap(~model,ncol = 1)
 ```
 
