@@ -5,7 +5,7 @@ rule all:
         expand("temp/{npID}_NanoPlot-data.tsv.gz", npID=config["inputNPfiles"]),
         expand("data/{npID}.fastq.gz", npID=config["inputNPfiles"]),
         expand("data/{npID}-{nreads}.fastq.gz", npID=config["inputNPfiles"], nreads=config["npreads"]),
-        expand("results/{npID}-{nreads}.flye.fa.gz", npID=config["inputNPfiles"], nreads=config["npreads"]),
+        expand("results/{npID}-{nreads}.{asmtype}.fa.gz", npID=config["inputNPfiles"], nreads=config["npreads"], asmtype=config["asmtypes"]),
 
 rule get_data:
     input:
@@ -120,7 +120,8 @@ rule medaka1x:
         medaka_model=config["medaka_model"],
     shell:
         """
-        basecall_mode=$(echo {wildcards.npID} | sed -E 's/.*_([a-z]+)\@.*/\1/')
+        ## There is an additional \ to avoid python/snakemake from causing problems https://stackoverflow.com/questions/70324411/snakemake-truncating-shell-codes
+        basecall_mode=$(echo {wildcards.npID} | sed -E 's/.*_([a-z]+)\@.*/\\1/')
         medaka_model="r1041_e82_400bps_"$basecall_mode"_g615"
         zcat {input.asm} > temp/{wildcards.npID}-unpolished.fa
         medaka_consensus -i {input.NPreads} -d temp/{wildcards.npID}-unpolished.fa -o temp/{wildcards.npID}-medaka -t {threads} -m $medaka_model

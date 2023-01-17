@@ -1,7 +1,7 @@
 README
 ================
 Rasmus Kirkegaard
-13 January, 2023
+17 January, 2023
 
 # R10.4.1 Zymo HMW basecalling
 
