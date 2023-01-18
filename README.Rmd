@@ -48,6 +48,48 @@ NP_QC_fast<-get_read_QC(model = "dna_r10.4.1_e8.2_400bps_fast@v4.0.0")
 NP_QC_hac<-get_read_QC(model = "dna_r10.4.1_e8.2_400bps_hac@v4.0.0")
 NP_QC_sup<-get_read_QC(model = "dna_r10.4.1_e8.2_400bps_sup@v4.0.0")
 NP_QC_combined<-bind_rows(NP_QC_fast,NP_QC_hac,NP_QC_sup)
+
+### read coverage
+draft_assemblies<-list.files(path = "results/",pattern = "*.assembly_info.txt",full.names = T)
+cov_tab<-tibble()
+for (f in draft_assemblies) {
+  cov_temp<-read_tsv(file = f) %>% mutate(draft=f)
+  cov_tab<-bind_rows(cov_tab,cov_temp)
+}
+cov_tab<-cov_tab %>% mutate(contigName=`#seq_name`,coverage=cov.,circular=circ.,
+                            ReadSet=str_replace(string =draft,pattern = ".*(dna.*).assembly_info.txt",replacement = "\\1")) %>% 
+  select(ReadSet,contigName,coverage,circular)
+
+### Assembly based stats
+fastani<-read_tsv(file = "results/fastani.tsv",col_names = c("query","ref","ANI","aligned_segments","total_segments")) %>% 
+  mutate(Assembly=str_replace(string = query,pattern = "results/bins/(.*).fa.*",replacement = "\\1"),
+         ref=str_replace(string = ref,pattern = ".*/(.*).fasta",replacement = "\\1")) %>% 
+  select(Assembly,ref,ANI)
+
+ref_genomes=list.files(path = "results/",pattern = "quast_.*.tsv",full.names = T)
+
+# Load quast data
+quast_tab<-tibble()
+for (f in ref_genomes) {
+  quast_temp<-read_tsv(file = f) %>% mutate(ref=f) %>% filter(`Total aligned length`!="-")
+  quast_tab<-bind_rows(quast_tab,quast_temp)
+}
+quast_tab<-quast_tab %>% mutate(ref=str_replace(string = ref,pattern = ".*quast_(.*).tsv",replacement = "\\1"),
+                                Assembly=str_trim(Assembly)) %>% filter(as.numeric(`Total aligned length`)>10^6) %>%
+  select(Assembly,ref,`Total length`,`Reference length`,`Largest alignment`,`Total aligned length`,`# indels per 100 kbp`,`# mismatches per 100 kbp`) %>%
+  mutate(`Total aligned length`=as.numeric(`Total aligned length`),
+         `# indels per 100 kbp`=as.numeric(`# indels per 100 kbp`),
+         `# mismatches per 100 kbp`=as.numeric(`# mismatches per 100 kbp`)) %>%
+  filter(Assembly!=ref)
+
+###
+genome_stats<-fastani %>% right_join(quast_tab,by = c("Assembly", "ref")) %>%
+  mutate(contigName=str_replace(string = Assembly,pattern = ".*(contig.*)",replacement = "\\1"),
+         ReadSet=str_replace(string = Assembly,pattern = "(.*).flye.*",replacement = "\\1")) %>%
+  filter(ANI>95) %>%
+  left_join(cov_tab,by = c("contigName", "ReadSet")) %>%
+  mutate(asmtype=str_replace(string = Assembly,pattern = ".*(fly.*).contig.*",replacement = "\\1")) %>%
+  mutate(model=str_replace(ReadSet,pattern = "-.*",replacement = ""))
 ```
 
 ## NP reads aligned to the refs
@@ -56,3 +98,15 @@ NP_QC_combined<-bind_rows(NP_QC_fast,NP_QC_hac,NP_QC_sup)
 NP_QC_combined %>% ggplot(aes(x = percentIdentity,col=REF))+geom_density()+geom_vline(xintercept = 99,col="red",linetype="dashed")+facet_wrap(~model,ncol = 1)+scale_x_continuous(breaks = 80:100,limits = c(80,100))
 ```
 
+## Indel rate vs coverage
+
+```{r fig.width=10, echo=FALSE,warning=FALSE,message=FALSE}
+genome_stats %>% 
+  ggplot(aes(x=coverage,y = `# indels per 100 kbp`,col=model,shape=asmtype))+geom_point()+geom_line()+facet_wrap(~ref)+scale_y_log10()
+```
+## Mismatch rate vs coverage
+
+```{r fig.width=10, echo=FALSE,warning=FALSE,message=FALSE}
+genome_stats %>% 
+  ggplot(aes(x=coverage,y = `# mismatches per 100 kbp`,col=model,shape=asmtype))+geom_point()+geom_line()+facet_wrap(~ref)+scale_y_log10()
+```

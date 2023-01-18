@@ -6,6 +6,9 @@ rule all:
         expand("data/{npID}.fastq.gz", npID=config["inputNPfiles"]),
         expand("data/{npID}-{nreads}.fastq.gz", npID=config["inputNPfiles"], nreads=config["npreads"]),
         expand("results/{npID}-{nreads}.{asmtype}.fa.gz", npID=config["inputNPfiles"], nreads=config["npreads"], asmtype=config["asmtypes"]),
+        expand("temp/{npID}-{nreads}.contigIDs.{asmtype}.txt", npID=config["inputNPfiles"], nreads=config["npreads"], asmtype=config["asmtypes"]),
+        "results/fastani.tsv",
+        "README.md",
 
 rule get_data:
     input:
@@ -155,7 +158,7 @@ rule extract_contigs:
 rule split_quast_QC:
     input:
         IDfiles=expand("temp/{npID}-{nreads}.contigIDs.{asmtype}.txt", npID=config["inputNPfiles"], nreads=config["npreads"], asmtype=config["asmtypes"]),
-        genomes=expand("results/{npID}-{nreads}.{asmtype}.fa.gz", npID=config["inputNPfiles"], nreads=config["npreads"],asmtype=config["asmtypes"]),
+        genomes=expand("results/{npID}-{nreads}.{asmtype}.fa.gz", npID=config["inputNPfiles"], nreads=config["npreads"], asmtype=config["asmtypes"]),
         ref="data/hmw_individual/{refID}.fasta",
     output:
         "results/quast_{refID}.tsv"
@@ -171,8 +174,8 @@ rule split_quast_QC:
 
 rule split_ANI:
     input:
-        expand("temp/{npID}.contigIDs.{asmtype}.txt", npID=config["inputNPfiles"],nreads=config["npreads"], asmtype=config["asmtypes"]),
-        expand("results/{npID}.{asmtype}.fa.gz", npID=config["inputNPfiles"],nreads=config["npreads"], asmtype=config["asmtypes"]),
+        expand("temp/{npID}-{nreads}.contigIDs.{asmtype}.txt", npID=config["inputNPfiles"],nreads=config["npreads"], asmtype=config["asmtypes"]),
+        expand("results/{npID}-{nreads}.{asmtype}.fa.gz", npID=config["inputNPfiles"], nreads=config["npreads"], asmtype=config["asmtypes"]),
         expand("data/hmw_individual/{refID}.fasta", refID=config["reffiles"]),
     output:
         "results/fastani.tsv"

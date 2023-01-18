@@ -5,6 +5,16 @@ inputNPfiles:
 npreads:
     - 10000
     - 20000
+    - 30000
+    - 40000
+    - 50000
+    - 60000
+    - 70000
+    - 80000
+    - 90000
+    - 100000
+    - 150000
+    - 200000
 reffiles:
     - B.subtilis_hifiasm
     - C.neoformans_hifiasm
