@@ -90,7 +90,8 @@ genome_stats<-fastani %>% right_join(quast_tab,by = c("Assembly", "ref")) %>%
   left_join(cov_tab,by = c("contigName", "ReadSet")) %>%
   mutate(asmtype=str_replace(string = Assembly,pattern = ".*(fly.*).contig.*",replacement = "\\1")) %>%
   mutate(model=str_replace(ReadSet,pattern = "-.*",replacement = "")) %>%
-  mutate(ref=str_replace(ref,pattern = "_hifiasm",replacement = ""))
+  mutate(ref=str_replace(ref,pattern = "_hifiasm",replacement = "")) %>%
+  filter(ref!="S.cerevisiae")
 ```
 
 ## NP reads aligned to the refs
@@ -103,12 +104,12 @@ NP_QC_combined %>% ggplot(aes(x = percentIdentity,col=REF))+geom_density()+geom_
 
 ```{r fig.width=10, echo=FALSE,warning=FALSE,message=FALSE}
 genome_stats %>% 
-  ggplot(aes(x=coverage,y = `# indels per 100 kbp`,col=model,shape=asmtype))+geom_point()+geom_line()+facet_wrap(~ref)+scale_y_log10()
+  ggplot(aes(x=coverage,y = `# indels per 100 kbp`,col=model,shape=asmtype))+geom_point()+geom_line()+facet_wrap(~ref)+scale_y_log10()+coord_cartesian(xlim=c(0, 100))
 ```
 
 ## Mismatch rate vs coverage
 
 ```{r fig.width=10, echo=FALSE,warning=FALSE,message=FALSE}
 genome_stats %>% 
-  ggplot(aes(x=coverage,y = `# mismatches per 100 kbp`,col=model,shape=asmtype))+geom_point()+geom_line()+facet_wrap(~ref)+scale_y_log10()
+  ggplot(aes(x=coverage,y = `# mismatches per 100 kbp`,col=model,shape=asmtype))+geom_point()+geom_line()+facet_wrap(~ref)+scale_y_log10()+coord_cartesian(xlim=c(0, 100))
 ```
