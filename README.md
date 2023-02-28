@@ -53,21 +53,25 @@ metrichor](https://ena-docs.readthedocs.io/en/latest/submit/fileprep/reads.html#
 If someone has a good solution please let me know and I will be happy to
 deposit the data.
 
-## NP reads aligned to the refs
+## NP reads mapped to the refs overall
 
 ![](README_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
 
-## NP reads aligned to the refs (95-100 % identity)
+## NP reads aligned to the refs
 
 ![](README_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
 
-## Indel rate vs coverage
+## NP reads aligned to the refs (95-100 % identity)
 
 ![](README_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
 
-## Mismatch rate vs coverage
+## Indel rate vs coverage
 
 ![](README_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+
+## Mismatch rate vs coverage
+
+![](README_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
 ## Materials and methods
 

@@ -121,16 +121,22 @@ genome_stats<-fastani %>% right_join(quast_tab,by = c("Assembly", "ref")) %>%
   filter(ref!="S.cerevisiae")
 ```
 
+## NP reads mapped to the refs overall
+
+```{r fig.width=10,fig.height=7,echo=FALSE,warning=FALSE,message=FALSE}
+NP_QC_combined %>% ggplot(aes(x = percentIdentity,col=model))+geom_density()+geom_vline(xintercept = 99,col="red",linetype="dashed")+scale_x_continuous(breaks = 85:100)+coord_cartesian(xlim=c(85, 100))+xlab("Percent identity")
+```
+
 ## NP reads aligned to the refs
 
 ```{r fig.width=10,fig.height=7,echo=FALSE,warning=FALSE,message=FALSE}
-NP_QC_combined %>% ggplot(aes(x = percentIdentity,col=REF))+geom_density()+geom_vline(xintercept = 99,col="red",linetype="dashed")+facet_wrap(~model,ncol = 1)+scale_x_continuous(breaks = 80:100,limits = c(80,100))
+NP_QC_combined %>% ggplot(aes(x = percentIdentity,col=REF))+geom_density()+geom_vline(xintercept = 99,col="red",linetype="dashed")+facet_wrap(~model,ncol = 1)+scale_x_continuous(breaks = 85:100)+coord_cartesian(xlim=c(85, 100))+xlab("Percent identity")
 ```
 
 ## NP reads aligned to the refs (95-100 % identity)
 
 ```{r fig.width=10,fig.height=7,echo=FALSE,warning=FALSE,message=FALSE}
-NP_QC_combined %>% ggplot(aes(x = percentIdentity,col=REF))+geom_density()+geom_vline(xintercept = 99,col="red",linetype="dashed")+facet_wrap(~model,ncol = 1)+coord_cartesian(xlim=c(95, 100))
+NP_QC_combined %>% ggplot(aes(x = percentIdentity,col=REF))+geom_density()+geom_vline(xintercept = 99,col="red",linetype="dashed")+facet_wrap(~model,ncol = 1)+coord_cartesian(xlim=c(95, 100))+xlab("Percent identity")
 ```
 
 ## Indel rate vs coverage
