@@ -1,7 +1,7 @@
 README
 ================
 Rasmus Kirkegaard
-27 February, 2023
+28 February, 2023
 
 # R10.4.1 Zymo HMW basecalling
 
@@ -57,13 +57,17 @@ deposit the data.
 
 ![](README_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
 
-## Indel rate vs coverage
+## NP reads aligned to the refs (95-100 % identity)
 
 ![](README_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
 
-## Mismatch rate vs coverage
+## Indel rate vs coverage
 
 ![](README_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
+
+## Mismatch rate vs coverage
+
+![](README_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
 ## Materials and methods
 
