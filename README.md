@@ -1,7 +1,7 @@
 README
 ================
 Rasmus Kirkegaard
-28 February, 2023
+01 March, 2023
 
 # R10.4.1 Zymo HMW basecalling
 
@@ -45,13 +45,15 @@ performed.
 
 ## Data availability
 
-Uploading \>1TB fast5 files have turned out to be a complicated
-challenge… seems like most of the guides for this were written in the
-early MinION access program days and never updated as they still refer
-to [fast5 files with basecalls included, albacore, and
-metrichor](https://ena-docs.readthedocs.io/en/latest/submit/fileprep/reads.html#oxford-nanopore).
-If someone has a good solution please let me know and I will be happy to
-deposit the data.
+The data has been added to the NCBI-SRA
+[PRJNA934154](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA934154). I
+have managed to upload the fastq and the fast5 files. However, I am
+still not sure how to find the page where the fast5 data can be
+downloaded. The fastq files should be available through the “cloud
+delivery service”.
+
+Fastq data (fast,hac & Sup):
+[SRR23563655](https://trace.ncbi.nlm.nih.gov/Traces/?view=run_browser&page_size=10&acc=SRR23563655&display=data-access)
 
 ## NP reads mapped to the refs overall
 
