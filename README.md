@@ -1,7 +1,7 @@
 README
 ================
 Rasmus Kirkegaard
-01 March, 2023
+02 March, 2023
 
 # R10.4.1 Zymo HMW basecalling
 
@@ -47,13 +47,14 @@ performed.
 
 The data has been added to the NCBI-SRA
 [PRJNA934154](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA934154). I
-have managed to upload the fastq and the fast5 files. However, I am
-still not sure how to find the page where the fast5 data can be
-downloaded. The fastq files should be available through the “cloud
-delivery service”.
+have managed to upload the fastq and the fast5 files. The fastq and
+fast5 files should be available through the “cloud delivery service”.
 
 Fastq data (fast,hac & Sup):
 [SRR23563655](https://trace.ncbi.nlm.nih.gov/Traces/?view=run_browser&page_size=10&acc=SRR23563655&display=data-access)
+
+Fast5 data:
+[SRR23437037](https://trace.ncbi.nlm.nih.gov/Traces/?view=run_browser&acc=SRR23437037&display=data-access)
 
 ## NP reads mapped to the refs overall
 
