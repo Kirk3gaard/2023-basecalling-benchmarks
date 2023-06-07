@@ -125,10 +125,11 @@ rule medaka1x:
         """
         ## There is an additional \ to avoid python/snakemake from causing problems https://stackoverflow.com/questions/70324411/snakemake-truncating-shell-codes
         basecall_mode=$(echo {wildcards.npID} | sed -E 's/.*_([a-z]+)\@.*/\\1/')
+        basecall_version=$(echo {wildcards.npID} | sed -E 's/.*_[a-z]+\@v(.*)-.*/\\1/')
         if [ "$basecall_mode" = "fast" ]; then
-            medaka_model="r1041_e82_400bps_fast_g632" # There does not appear to be a 4.0.0 medaka model for fast mode
+            medaka_model="r1041_e82_400bps_fast_g632" # There does not appear to be a 4.0.0, 4.1.0 or 4.2.0 medaka model for fast mode
         else 
-            medaka_model="r1041_e82_400bps_"$basecall_mode"_v4.0.0"
+            medaka_model="r1041_e82_400bps_"$basecall_mode"_v$basecall_version"
         fi
         zcat {input.asm} > temp/{wildcards.npID}-unpolished.fa
         medaka_consensus -i {input.NPreads} -d temp/{wildcards.npID}-unpolished.fa -o temp/{wildcards.npID}-medaka -t {threads} -m $medaka_model
