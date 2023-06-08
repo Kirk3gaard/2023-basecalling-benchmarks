@@ -1,7 +1,7 @@
 README
 ================
 Rasmus Kirkegaard
-15 March, 2023
+08 June, 2023
 
 # R10.4.1 Zymo HMW basecalling
 
@@ -24,6 +24,8 @@ performed.
     read accuracy
 3.  Evaluate the impact is of the different basecalling models on
     consensus accuracy
+4.  Evaluate if the introduction of 5khz sampling would allow for a move
+    from SUP basecalling to HAC basecalling to speed up basecalling
 
 ## Conclusion
 
@@ -42,8 +44,13 @@ performed.
     fast and hac. So super accuracy mode is the way to go if the aim is
     to generate reference quality genomes despite the additional need
     for GPU compute.
+4.  HAC data shows a serious improvement on raw read accuracy compared
+    to 4khz sampling. However, it is still inferior to the 4khz SUP data
+    on this metric.
 
 ## Data availability
+
+### 4 khz data
 
 The data has been added to the NCBI-SRA
 [PRJNA934154](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA934154). I
@@ -56,25 +63,49 @@ Fastq data (fast,hac & Sup):
 Fast5 data:
 [SRR23437037](https://trace.ncbi.nlm.nih.gov/Traces/?view=run_browser&acc=SRR23437037&display=data-access)
 
+### 5 khz data
+
+I hope to get around to upload that data soon.
+
 ## NP reads mapped to the refs overall
 
 ![](README_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
 
-## NP reads aligned to the refs
+## NP reads aligned to the refs (95-100 % identity)
 
 ![](README_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
 
-## NP reads aligned to the refs (95-100 % identity)
+## Indel rate vs coverage
 
 ![](README_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
 
-## Indel rate vs coverage
+## Mismatch rate vs coverage
 
 ![](README_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
-## Mismatch rate vs coverage
+## 4khz SUP vs 5 khz HAC & SUP
+
+With the launch of 5 khz sampling rate around London Calling 2023 ONT
+was hoping that the GPU power needed for basecalling could be decreased
+dramatically as this should allow for the use of the faster HAC model to
+replace the compute intensive SUP model at 4khz. To test this we here
+compare the consensus assemblies with the 4 khz SUP model and the new
+5khz HAC and SUP models.
+
+### Indels
+
+The indel rate seems to be higher with 5khz HAC than both SUP regardless
+of sample rate. Interestingly the 5khz sample rate with SUP performs
+much better than 4 khz SUP for some organisms but not S enterica.
 
 ![](README_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+
+### Mismatches
+
+While HAC is on par with SUP for some organisms it is never the best
+option for mismatches.
+
+![](README_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 ## Materials and methods
 
@@ -89,13 +120,23 @@ standard](https://zymoresearch.eu/products/zymobiomics-hmw-dna-standard).
 The DNA was prepared for sequencing using the nanopore ligation
 sequencing kit (SQK-LSK114) and sequenced on a R10.4.1 nanopore
 promethion flowcell (FLO-PRO114M) with the “400 bp/s” mode (4khz
-sampling).
+sampling). The DNA was prepared for sequencing using the nanopore
+ligation sequencing kit (SQK-LSK114) and sequenced on a R10.4.1 nanopore
+MinION flowcell (FLO-MIN114) with the “400 bp/s” mode (5khz sampling).
 
 ### Basecalling
 
+#### 4 khz PromethION data
+
 The reads were basecalled using
 [dorado](https://github.com/nanoporetech/dorado) (v. 0.1.1) with fast,
-hac and sup accuracy mode using the 4.0.0 models.
+hac and sup accuracy mode using the 4.0.0 and 4.1.0 models.
+
+#### 5 khz MinION data
+
+The reads were basecalled using
+[dorado](https://github.com/nanoporetech/dorado) (v. 0.3.0) with fast,
+hac and sup accuracy mode using the 4.2.0 models.
 
 ### Read QC
 
@@ -109,7 +150,7 @@ public soon) using [minimap2](https://github.com/lh3/minimap2) (v.
 The reads were subsampled using [seqtk](https://github.com/lh3/seqtk)
 (v. 1.3) and assembled using [flye](https://github.com/fenderglass/Flye)
 (v. 2.9.1). The metagenome assemblies were then polished using
-[medaka](https://github.com/nanoporetech/medaka) (v. 1.7.2).
+[medaka](https://github.com/nanoporetech/medaka) (v. 1.8.0).
 
 ### Genome quality assessment
 

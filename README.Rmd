@@ -19,15 +19,18 @@ With the release of R10.4.1 I wanted to check the quality of the raw reads and t
 1. Check if nanopore R10.4.1 is also capable of generating nanopore only assemblies. 
 2. Evaluate the impact is of the different basecalling models on raw read accuracy 
 3. Evaluate the impact is of the different basecalling models on consensus accuracy
+4. Evaluate if the introduction of 5khz sampling would allow for a move from SUP basecalling to HAC basecalling to speed up basecalling
 
 ## Conclusion
 
 1. Yes!!! The obtained indel and mismatch rates are very low already around 25X coverage. At ~0.1 /100 Kbp a 5 Mbp genome will have 5 "errors" (Could still be the references at this point but likely does not matter) so it is unlikely to affect gene calling and most downstream analysis.
 2. There is a huge difference between fast, hac and sup for raw read accuracy. However, the time needed for compute is also much much higher for the super accuracy model.
 3. There seems to be a clear improvement in consensus accuracy by using super accuracy reads. Even providing higher coverage for fast or hac accuracy reads do not seem to fix this indicating that some of the errors fixed by sup(er accuracy) are indeed systematic errors in fast and hac. So super accuracy mode is the way to go if the aim is to generate reference quality genomes despite the additional need for GPU compute.
+4. HAC data shows a serious improvement on raw read accuracy compared to 4khz sampling. However, it is still inferior to the 4khz SUP data on this metric. 
 
 ## Data availability
 
+### 4 khz data
 The data has been added to the NCBI-SRA [PRJNA934154](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA934154). I have managed to upload the fastq and the fast5 files. The fastq and fast5 files should be available through the "cloud delivery service".
 
 Fastq data (fast,hac & Sup): 
@@ -35,6 +38,9 @@ Fastq data (fast,hac & Sup):
 
 Fast5 data:
 [SRR23437037](https://trace.ncbi.nlm.nih.gov/Traces/?view=run_browser&acc=SRR23437037&display=data-access)
+
+### 5 khz data
+I hope to get around to upload that data soon.
 
 ```{r load_libraries_and_data,echo=FALSE,warning=FALSE,message=FALSE}
 library(tidyverse)
@@ -75,12 +81,20 @@ NP_QC_sup_4.0.0<-get_read_QC(model = "dna_r10.4.1_e8.2_400bps_sup@v4.0.0")
 NP_QC_fast_4.1.0<-get_read_QC(model = "dna_r10.4.1_e8.2_400bps_fast@v4.1.0")
 NP_QC_hac_4.1.0<-get_read_QC(model = "dna_r10.4.1_e8.2_400bps_hac@v4.1.0")
 NP_QC_sup_4.1.0<-get_read_QC(model = "dna_r10.4.1_e8.2_400bps_sup@v4.1.0")
+NP_QC_fast_4.2.0<-get_read_QC(model = "dna_r10.4.1_e8.2_400bps_fast@v4.2.0")
+NP_QC_hac_4.2.0<-get_read_QC(model = "dna_r10.4.1_e8.2_400bps_hac@v4.2.0")
+NP_QC_sup_4.2.0<-get_read_QC(model = "dna_r10.4.1_e8.2_400bps_sup@v4.2.0")
 NP_QC_combined<-bind_rows(NP_QC_fast_4.0.0,
                           NP_QC_hac_4.0.0,
                           NP_QC_sup_4.0.0,
                           NP_QC_fast_4.1.0,
                           NP_QC_hac_4.1.0,
-                          NP_QC_sup_4.1.0)
+                          NP_QC_sup_4.1.0,
+                          NP_QC_fast_4.2.0,
+                          NP_QC_hac_4.2.0,
+                          NP_QC_sup_4.2.0) %>%
+  mutate(model_version=gsub(x = model,pattern=".*@v(.*)",replacement = "\\1"),
+         basecalling_model=gsub(x = model,pattern=".*bps_(.*)@v.*",replacement = "\\1"))
 
 ### read coverage
 draft_assemblies<-list.files(path = "results/",pattern = "*.assembly_info.txt",full.names = T)
@@ -124,19 +138,15 @@ genome_stats<-fastani %>% right_join(quast_tab,by = c("Assembly", "ref")) %>%
   mutate(asmtype=str_replace(string = Assembly,pattern = ".*(fly.*).contig.*",replacement = "\\1")) %>%
   mutate(model=str_replace(ReadSet,pattern = "-.*",replacement = "")) %>%
   mutate(ref=str_replace(ref,pattern = "_hifiasm",replacement = "")) %>%
-  filter(ref!="S.cerevisiae")
+  filter(ref!="S.cerevisiae") %>%
+  mutate(model_version=gsub(x = model,pattern=".*@v(.*)",replacement = "\\1"),
+         basecalling_model=gsub(x = model,pattern=".*bps_(.*)@v.*",replacement = "\\1"))
 ```
 
 ## NP reads mapped to the refs overall
 
 ```{r fig.width=10,fig.height=7,echo=FALSE,warning=FALSE,message=FALSE}
-NP_QC_combined %>% ggplot(aes(x = percentIdentity,col=model))+geom_density()+geom_vline(xintercept = 99,col="red",linetype="dashed")+scale_x_continuous(breaks = 85:100)+coord_cartesian(xlim=c(85, 100))+xlab("Percent identity")
-```
-
-## NP reads aligned to the refs
-
-```{r fig.width=10,fig.height=7,echo=FALSE,warning=FALSE,message=FALSE}
-NP_QC_combined %>% ggplot(aes(x = percentIdentity,col=REF))+geom_density()+geom_vline(xintercept = 99,col="red",linetype="dashed")+facet_wrap(~model,ncol = 1)+scale_x_continuous(breaks = 85:100)+coord_cartesian(xlim=c(85, 100))+xlab("Percent identity")
+NP_QC_combined %>% ggplot(aes(x = percentIdentity,col=basecalling_model))+geom_density()+geom_vline(xintercept = 99,col="red",linetype="dashed")+scale_x_continuous(breaks = 85:100)+coord_cartesian(xlim=c(85, 100))+xlab("Percent identity")+facet_wrap(~model_version,ncol = 1)
 ```
 
 ## NP reads aligned to the refs (95-100 % identity)
@@ -159,21 +169,57 @@ genome_stats %>%
   ggplot(aes(x=coverage,y = `# mismatches per 100 kbp`,col=model,shape=asmtype))+geom_point()+geom_line()+facet_wrap(~ref)+scale_y_log10()+coord_cartesian(xlim=c(0, 100))
 ```
 
+## 4khz SUP vs 5 khz HAC & SUP
+
+With the launch of 5 khz sampling rate around London Calling 2023 ONT was hoping that the GPU power needed for basecalling could be decreased dramatically as this should allow for the use of the faster HAC model to replace the compute intensive SUP model at 4khz. To test this we here compare the consensus assemblies with the 4 khz SUP model and the new 5khz HAC and SUP models.
+
+### Indels
+
+The indel rate seems to be higher with 5khz HAC than both SUP regardless of sample rate. Interestingly the 5khz sample rate with SUP performs much better than 4 khz SUP for some organisms but not S enterica. 
+
+```{r fig.width=10, echo=FALSE,warning=FALSE,message=FALSE}
+genome_stats %>% 
+  filter(basecalling_model!="fast") %>%
+  filter(model_version %in% c("4.1.0","4.2.0")) %>%
+  filter(!(model_version == "4.1.0" & basecalling_model=="hac")) %>%
+  mutate(Sample_rate_model=case_when(model_version=="4.1.0"~paste0("4khz_",basecalling_model),
+                                     model_version=="4.2.0"~paste0("5khz_",basecalling_model))) %>%
+  ggplot(aes(x=coverage,y = `# indels per 100 kbp`,col=Sample_rate_model,shape=asmtype))+geom_point()+geom_line()+facet_wrap(~ref)+scale_y_log10()+coord_cartesian(xlim=c(0, 100))
+```
+
+### Mismatches
+
+While HAC is on par with SUP for some organisms it is never the best option for mismatches.
+
+```{r fig.width=10, echo=FALSE,warning=FALSE,message=FALSE}
+genome_stats %>% 
+  filter(basecalling_model!="fast") %>%
+  filter(model_version %in% c("4.1.0","4.2.0")) %>%
+  filter(!(model_version == "4.1.0" & basecalling_model=="hac")) %>%
+  mutate(Sample_rate_model=case_when(model_version=="4.1.0"~paste0("4khz_",basecalling_model),
+                                     model_version=="4.2.0"~paste0("5khz_",basecalling_model))) %>%
+  ggplot(aes(x=coverage,y = `# mismatches per 100 kbp`,col=Sample_rate_model,shape=asmtype))+geom_point()+geom_line()+facet_wrap(~ref)+scale_y_log10()+coord_cartesian(xlim=c(0, 100))
+```
+
 ## Materials and methods
 
 Here is a brief description of the tools used. For the exact commands check out the **Snakefile** in this repository ([Snakemake](https://snakemake.readthedocs.io/en/stable/) v. 7.18.2).
 
 ### DNA sequencing
-DNA sample was the [Zymo Mock HMW standard](https://zymoresearch.eu/products/zymobiomics-hmw-dna-standard). The DNA was prepared for sequencing using the nanopore ligation sequencing kit (SQK-LSK114) and sequenced on a R10.4.1 nanopore promethion flowcell (FLO-PRO114M) with the "400 bp/s" mode (4khz sampling). 
+DNA sample was the [Zymo Mock HMW standard](https://zymoresearch.eu/products/zymobiomics-hmw-dna-standard). The DNA was prepared for sequencing using the nanopore ligation sequencing kit (SQK-LSK114) and sequenced on a R10.4.1 nanopore promethion flowcell (FLO-PRO114M) with the "400 bp/s" mode (4khz sampling). The DNA was prepared for sequencing using the nanopore ligation sequencing kit (SQK-LSK114) and sequenced on a R10.4.1 nanopore MinION flowcell (FLO-MIN114) with the "400 bp/s" mode (5khz sampling). 
 
 ### Basecalling
-The reads were basecalled using [dorado](https://github.com/nanoporetech/dorado) (v. 0.1.1) with fast, hac and sup accuracy mode using the 4.0.0 models. 
+#### 4 khz PromethION data
+The reads were basecalled using [dorado](https://github.com/nanoporetech/dorado) (v. 0.1.1) with fast, hac and sup accuracy mode using the 4.0.0 and 4.1.0 models. 
+
+#### 5 khz MinION data
+The reads were basecalled using [dorado](https://github.com/nanoporetech/dorado) (v. 0.3.0) with fast, hac and sup accuracy mode using the 4.2.0 models. 
 
 ### Read QC
 Reads were mapped to the updated zymo reference genomes (hopefully goes public soon) using [minimap2](https://github.com/lh3/minimap2) (v. 2.24), and QC information was obtained using [NanoPlot](https://github.com/wdecoster/NanoPlot) (v. 1.41.0).
 
 ### Assembly
-The reads were subsampled using [seqtk](https://github.com/lh3/seqtk) (v. 1.3) and assembled using [flye](https://github.com/fenderglass/Flye) (v. 2.9.1). The metagenome assemblies were then polished using [medaka](https://github.com/nanoporetech/medaka) (v. 1.7.2).
+The reads were subsampled using [seqtk](https://github.com/lh3/seqtk) (v. 1.3) and assembled using [flye](https://github.com/fenderglass/Flye) (v. 2.9.1). The metagenome assemblies were then polished using [medaka](https://github.com/nanoporetech/medaka) (v. 1.8.0).
 
 ### Genome quality assessment
 The assembled contigs were compared to the reference contigs using [QUAST](https://github.com/ablab/quast) (v. 5.2.0) and [fastANI](https://github.com/ParBLiSS/FastANI) (v. 1.33).
