@@ -17,8 +17,8 @@ With the release of R10.4.1 I wanted to check the quality of the raw reads and t
 ## Aim
 
 1. Check if nanopore R10.4.1 is also capable of generating nanopore only assemblies. 
-2. Evaluate the impact is of the different basecalling models on raw read accuracy 
-3. Evaluate the impact is of the different basecalling models on consensus accuracy
+2. Evaluate the impact of the different basecalling models on raw read accuracy 
+3. Evaluate the impact of the different basecalling models on consensus accuracy
 4. Evaluate if the introduction of 5khz sampling would allow for a move from SUP basecalling to HAC basecalling to speed up basecalling
 
 ## Conclusion
@@ -26,7 +26,7 @@ With the release of R10.4.1 I wanted to check the quality of the raw reads and t
 1. Yes!!! The obtained indel and mismatch rates are very low already around 25X coverage. At ~0.1 /100 Kbp a 5 Mbp genome will have 5 "errors" (Could still be the references at this point but likely does not matter) so it is unlikely to affect gene calling and most downstream analysis.
 2. There is a huge difference between fast, hac and sup for raw read accuracy. However, the time needed for compute is also much much higher for the super accuracy model.
 3. There seems to be a clear improvement in consensus accuracy by using super accuracy reads. Even providing higher coverage for fast or hac accuracy reads do not seem to fix this indicating that some of the errors fixed by sup(er accuracy) are indeed systematic errors in fast and hac. So super accuracy mode is the way to go if the aim is to generate reference quality genomes despite the additional need for GPU compute.
-4. HAC data shows a serious improvement on raw read accuracy compared to 4khz sampling. However, it is still inferior to the 4khz SUP data on this metric. 
+4. HAC data shows a serious improvement on raw read accuracy compared to 4khz sampling. However, it is still inferior to the 4khz SUP data on this metric. For assemblies the consensus is on par with 4 khz sup for some organisms but generally slightly worse. For mismatches there is a similar pattern with some organisms being equally good and others where HAC is simply worse.
 
 ## Data availability
 

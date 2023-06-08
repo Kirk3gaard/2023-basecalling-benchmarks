@@ -617,10 +617,10 @@ performed.</p>
 <ol style="list-style-type: decimal">
 <li>Check if nanopore R10.4.1 is also capable of generating nanopore
 only assemblies.</li>
-<li>Evaluate the impact is of the different basecalling models on raw
-read accuracy</li>
-<li>Evaluate the impact is of the different basecalling models on
-consensus accuracy</li>
+<li>Evaluate the impact of the different basecalling models on raw read
+accuracy</li>
+<li>Evaluate the impact of the different basecalling models on consensus
+accuracy</li>
 <li>Evaluate if the introduction of 5khz sampling would allow for a move
 from SUP basecalling to HAC basecalling to speed up basecalling</li>
 </ol>
@@ -643,7 +643,10 @@ generate reference quality genomes despite the additional need for GPU
 compute.</li>
 <li>HAC data shows a serious improvement on raw read accuracy compared
 to 4khz sampling. However, it is still inferior to the 4khz SUP data on
-this metric.</li>
+this metric. For assemblies the consensus is on par with 4 khz sup for
+some organisms but generally slightly worse. For mismatches there is a
+similar pattern with some organisms being equally good and others where
+HAC is simply worse.</li>
 </ol>
 <h2 id="data-availability">Data availability</h2>
 <h3 id="id_4-khz-data">4 khz data</h3>

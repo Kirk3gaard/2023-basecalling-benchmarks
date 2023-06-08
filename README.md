@@ -20,10 +20,10 @@ performed.
 
 1.  Check if nanopore R10.4.1 is also capable of generating nanopore
     only assemblies.
-2.  Evaluate the impact is of the different basecalling models on raw
-    read accuracy
-3.  Evaluate the impact is of the different basecalling models on
-    consensus accuracy
+2.  Evaluate the impact of the different basecalling models on raw read
+    accuracy
+3.  Evaluate the impact of the different basecalling models on consensus
+    accuracy
 4.  Evaluate if the introduction of 5khz sampling would allow for a move
     from SUP basecalling to HAC basecalling to speed up basecalling
 
@@ -46,7 +46,10 @@ performed.
     for GPU compute.
 4.  HAC data shows a serious improvement on raw read accuracy compared
     to 4khz sampling. However, it is still inferior to the 4khz SUP data
-    on this metric.
+    on this metric. For assemblies the consensus is on par with 4 khz
+    sup for some organisms but generally slightly worse. For mismatches
+    there is a similar pattern with some organisms being equally good
+    and others where HAC is simply worse.
 
 ## Data availability
 
