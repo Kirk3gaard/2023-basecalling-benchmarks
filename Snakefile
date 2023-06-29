@@ -128,6 +128,8 @@ rule medaka1x:
         basecall_version=$(echo {wildcards.npID} | sed -E 's/.*_[a-z]+\@v(.*)-.*/\\1/')
         if [ "$basecall_mode" = "fast" ]; then
             medaka_model="r1041_e82_400bps_fast_g632" # There does not appear to be a 4.0.0, 4.1.0 or 4.2.0 medaka model for fast mode
+        elif [ "$basecall_mode" = "supdup" ]; then
+            medaka_model="r1041_e82_400bps_sup_v$basecall_version"
         else 
             medaka_model="r1041_e82_400bps_"$basecall_mode"_v$basecall_version"
         fi

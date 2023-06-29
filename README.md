@@ -1,7 +1,7 @@
 README
 ================
 Rasmus Kirkegaard
-08 June, 2023
+29 June, 2023
 
 # R10.4.1 Zymo HMW basecalling
 
@@ -68,23 +68,40 @@ Fast5 data:
 
 ### 5 khz data
 
-I hope to get around to upload that data soon.
+Fastq data: - fast:
+[SRR24893246](https://trace.ncbi.nlm.nih.gov/Traces/?view=run_browser&page_size=10&acc=SRR24893246&display=data-access) -
+hac:
+[SRR24893245](https://trace.ncbi.nlm.nih.gov/Traces/?view=run_browser&page_size=10&acc=SRR24893245&display=data-access) -
+sup:
+[SRR24893244](https://trace.ncbi.nlm.nih.gov/Traces/?view=run_browser&page_size=10&acc=SRR24893244&display=data-access)
 
-## NP reads mapped to the refs overall
+Pod5 data: NCBI will not accept this format. Trying to convince ENA to
+accept it (<https://github.com/enasequence/read_docs/issues/129>).
+
+## NP reads mapped to the refs overall (percent identity)
 
 ![](README_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
 
-## NP reads aligned to the refs (95-100 % identity)
+## NP reads mapped to the refs overall (phred scale)
+
+Phred scores for perfect matching reads are calculated as recommended by
+[Armin
+Topfer](https://twitter.com/kirk3gaard/status/1397457000217423873) which
+takes length into account.
 
 ![](README_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
 
-## Indel rate vs coverage
+## NP reads aligned to the refs (95-100 % identity)
 
 ![](README_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
 
-## Mismatch rate vs coverage
+## Indel rate vs coverage
 
 ![](README_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+
+## Mismatch rate vs coverage
+
+![](README_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
 ## 4khz SUP vs 5 khz HAC & SUP
 
@@ -101,14 +118,14 @@ The indel rate seems to be higher with 5khz HAC than both SUP regardless
 of sample rate. Interestingly the 5khz sample rate with SUP performs
 much better than 4 khz SUP for some organisms but not S enterica.
 
-![](README_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 ### Mismatches
 
 While HAC is on par with SUP for some organisms it is never the best
 option for mismatches.
 
-![](README_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 ## Materials and methods
 
