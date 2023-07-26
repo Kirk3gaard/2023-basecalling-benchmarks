@@ -1,7 +1,7 @@
 README
 ================
 Rasmus Kirkegaard
-29 June, 2023
+26 July, 2023
 
 # R10.4.1 Zymo HMW basecalling
 
@@ -75,8 +75,9 @@ hac:
 sup:
 [SRR24893244](https://trace.ncbi.nlm.nih.gov/Traces/?view=run_browser&page_size=10&acc=SRR24893244&display=data-access)
 
-Pod5 data: NCBI will not accept this format. Trying to convince ENA to
-accept it (<https://github.com/enasequence/read_docs/issues/129>).
+Pod5 data: The data has been added to the ENA
+[PRJEB64570](https://www.ebi.ac.uk/ena/browser/view/PRJEB64570). (NCBI
+did not accept pod5 and told me they do not want to do that)
 
 ## NP reads mapped to the refs overall (percent identity)
 

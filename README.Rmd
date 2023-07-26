@@ -48,7 +48,7 @@ Fastq data:
 
 
 Pod5 data:
-NCBI will not accept this format. Trying to convince ENA to accept it ([https://github.com/enasequence/read_docs/issues/129](https://github.com/enasequence/read_docs/issues/129)). 
+The data has been added to the ENA [PRJEB64570](https://www.ebi.ac.uk/ena/browser/view/PRJEB64570). (NCBI did not accept pod5 and told me they do not want to do that)
 
 ```{r load_libraries_and_data,echo=FALSE,warning=FALSE,message=FALSE}
 library(tidyverse)
