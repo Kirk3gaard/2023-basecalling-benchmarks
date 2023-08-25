@@ -5,10 +5,11 @@ temp/
 .snakemake/
 
 
-# fasta and fastq files
+# Massive text files
 *.fa
 *.fastq
 *.gz
+*.assembly_info.txt
 
 # History files
 .Rhistory

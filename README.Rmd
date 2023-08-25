@@ -20,6 +20,7 @@ With the release of R10.4.1 I wanted to check the quality of the raw reads and t
 2. Evaluate the impact of the different basecalling models on raw read accuracy 
 3. Evaluate the impact of the different basecalling models on consensus accuracy
 4. Evaluate if the introduction of 5khz sampling would allow for a move from SUP basecalling to HAC basecalling to speed up basecalling
+5. Check out duplex basecalling
 
 ## Conclusion
 
@@ -27,6 +28,7 @@ With the release of R10.4.1 I wanted to check the quality of the raw reads and t
 2. There is a huge difference between fast, hac and sup for raw read accuracy. However, the time needed for compute is also much much higher for the super accuracy model.
 3. There seems to be a clear improvement in consensus accuracy by using super accuracy reads. Even providing higher coverage for fast or hac accuracy reads do not seem to fix this indicating that some of the errors fixed by sup(er accuracy) are indeed systematic errors in fast and hac. So super accuracy mode is the way to go if the aim is to generate reference quality genomes despite the additional need for GPU compute.
 4. HAC data shows a serious improvement on raw read accuracy compared to 4khz sampling. However, it is still inferior to the 4khz SUP data on this metric. For assemblies the consensus is on par with 4 khz sup for some organisms but generally slightly worse. For mismatches there is a similar pattern with some organisms being equally good and others where HAC is simply worse.
+5. Duplex reads really represent a step change in single read accuracy
 
 ## Data availability
 
@@ -49,6 +51,15 @@ Fastq data:
 
 Pod5 data:
 The data has been added to the ENA [PRJEB64570](https://www.ebi.ac.uk/ena/browser/view/PRJEB64570). (NCBI did not accept pod5 and told me they do not want to do that)
+
+### 5 khz high duplex data
+
+Fastq data:
+- upload ongoing
+
+
+Pod5 data:
+- upload ongoing
 
 ```{r load_libraries_and_data,echo=FALSE,warning=FALSE,message=FALSE}
 library(tidyverse)
@@ -93,6 +104,7 @@ NP_QC_supdup_4.1.0<-get_read_QC(model = "dna_r10.4.1_e8.2_400bps_supdup@v4.1.0")
 NP_QC_fast_4.2.0<-get_read_QC(model = "dna_r10.4.1_e8.2_400bps_fast@v4.2.0")
 NP_QC_hac_4.2.0<-get_read_QC(model = "dna_r10.4.1_e8.2_400bps_hac@v4.2.0")
 NP_QC_sup_4.2.0<-get_read_QC(model = "dna_r10.4.1_e8.2_400bps_sup@v4.2.0")
+NP_QC_supdup_4.2.0<-get_read_QC(model = "dna_r10.4.1_e8.2_400bps_supdup@v4.2.0")
 NP_QC_combined<-bind_rows(NP_QC_fast_4.0.0,
                           NP_QC_hac_4.0.0,
                           NP_QC_sup_4.0.0,
@@ -102,7 +114,8 @@ NP_QC_combined<-bind_rows(NP_QC_fast_4.0.0,
                           NP_QC_supdup_4.1.0,
                           NP_QC_fast_4.2.0,
                           NP_QC_hac_4.2.0,
-                          NP_QC_sup_4.2.0) %>%
+                          NP_QC_sup_4.2.0,
+                          NP_QC_supdup_4.2.0) %>%
   mutate(model_version=gsub(x = model,pattern=".*@v(.*)",replacement = "\\1"),
          basecalling_model=gsub(x = model,pattern=".*bps_(.*)@v.*",replacement = "\\1"))
 
@@ -170,10 +183,10 @@ NP_QC_combined %>%
   ggplot(aes(x = Phred,col=basecalling_model))+geom_density()+geom_vline(xintercept = 20,col="red",linetype="dashed")+xlab("Phred score (Q)")+facet_wrap(~model_version,ncol = 1)
 ```
 
-## NP reads aligned to the refs (95-100 % identity)
+## NP reads aligned to the refs (98-100 % identity)
 
 ```{r fig.width=10,fig.height=7,echo=FALSE,warning=FALSE,message=FALSE}
-NP_QC_combined %>% ggplot(aes(x = percentIdentity,col=REF))+geom_density()+geom_vline(xintercept = 99,col="red",linetype="dashed")+facet_wrap(~model,ncol = 1,scales = "free_y")+coord_cartesian(xlim=c(95, 100))+xlab("Percent identity")
+NP_QC_combined %>% ggplot(aes(x = percentIdentity,col=REF))+geom_density()+geom_vline(xintercept = 99,col="red",linetype="dashed")+geom_vline(xintercept = 99.9,col="red",linetype="dashed")+facet_wrap(~model,ncol = 1,scales = "free_y")+coord_cartesian(xlim=c(98, 100))+scale_x_continuous(breaks = seq(98,100,0.1))+xlab("Percent identity")
 ```
 
 ## Indel rate vs coverage
@@ -227,7 +240,7 @@ genome_stats %>%
 Here is a brief description of the tools used. For the exact commands check out the **Snakefile** in this repository ([Snakemake](https://snakemake.readthedocs.io/en/stable/) v. 7.18.2).
 
 ### DNA sequencing
-DNA sample was the [Zymo Mock HMW standard](https://zymoresearch.eu/products/zymobiomics-hmw-dna-standard). The DNA was prepared for sequencing using the nanopore ligation sequencing kit (SQK-LSK114) and sequenced on a R10.4.1 nanopore promethion flowcell (FLO-PRO114M) with the "400 bp/s" mode (4khz sampling). The DNA was prepared for sequencing using the nanopore ligation sequencing kit (SQK-LSK114) and sequenced on a R10.4.1 nanopore MinION flowcell (FLO-MIN114) with the "400 bp/s" mode (5khz sampling). 
+DNA sample was the [Zymo Mock HMW standard](https://zymoresearch.eu/products/zymobiomics-hmw-dna-standard). The DNA was prepared for sequencing using the nanopore ligation sequencing kit (SQK-LSK114) and sequenced on a R10.4.1 nanopore promethion flowcell (FLO-PRO114M) with the "400 bp/s" mode (4khz sampling). The DNA was prepared for sequencing using the nanopore ligation sequencing kit (SQK-LSK114) and sequenced on a R10.4.1 nanopore MinION flowcell (FLO-MIN114) with the "400 bp/s" mode (5khz sampling). The DNA was prepared for sequencing using the nanopore ligation sequencing kit (SQK-LSK114) and sequenced on a R10.4.1 nanopore PromethION flowcell (FLO-PRO114HD) with the "400 bp/s" mode (5khz sampling).
 
 ### Basecalling
 #### 4 khz PromethION data
@@ -235,6 +248,9 @@ The reads were basecalled using [dorado](https://github.com/nanoporetech/dorado)
 
 #### 5 khz MinION data
 The reads were basecalled using [dorado](https://github.com/nanoporetech/dorado) (v. 0.3.0) with fast, hac and sup accuracy mode using the 4.2.0 models. 
+
+#### 5 khz High Duplex PromethION data
+The reads were basecalled using [dorado](https://github.com/nanoporetech/dorado) (v. 0.3.4) with fast, hac and sup accuracy mode using the 4.2.0 models. 
 
 ### Read QC
 Reads were mapped to the updated zymo reference genomes (hopefully goes public soon) using [minimap2](https://github.com/lh3/minimap2) (v. 2.24), and QC information was obtained using [NanoPlot](https://github.com/wdecoster/NanoPlot) (v. 1.41.0).

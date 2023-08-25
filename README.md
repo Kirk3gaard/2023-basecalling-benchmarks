@@ -1,7 +1,7 @@
 README
 ================
 Rasmus Kirkegaard
-26 July, 2023
+25 August, 2023
 
 # R10.4.1 Zymo HMW basecalling
 
@@ -26,6 +26,7 @@ performed.
     accuracy
 4.  Evaluate if the introduction of 5khz sampling would allow for a move
     from SUP basecalling to HAC basecalling to speed up basecalling
+5.  Check out duplex basecalling
 
 ## Conclusion
 
@@ -50,6 +51,7 @@ performed.
     sup for some organisms but generally slightly worse. For mismatches
     there is a similar pattern with some organisms being equally good
     and others where HAC is simply worse.
+5.  Duplex reads really represent a step change in single read accuracy
 
 ## Data availability
 
@@ -79,6 +81,12 @@ Pod5 data: The data has been added to the ENA
 [PRJEB64570](https://www.ebi.ac.uk/ena/browser/view/PRJEB64570). (NCBI
 did not accept pod5 and told me they do not want to do that)
 
+### 5 khz high duplex data
+
+Fastq data: - upload ongoing
+
+Pod5 data: - upload ongoing
+
 ## NP reads mapped to the refs overall (percent identity)
 
 ![](README_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
@@ -92,7 +100,7 @@ takes length into account.
 
 ![](README_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
 
-## NP reads aligned to the refs (95-100 % identity)
+## NP reads aligned to the refs (98-100 % identity)
 
 ![](README_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
 
@@ -144,6 +152,10 @@ promethion flowcell (FLO-PRO114M) with the “400 bp/s” mode (4khz
 sampling). The DNA was prepared for sequencing using the nanopore
 ligation sequencing kit (SQK-LSK114) and sequenced on a R10.4.1 nanopore
 MinION flowcell (FLO-MIN114) with the “400 bp/s” mode (5khz sampling).
+The DNA was prepared for sequencing using the nanopore ligation
+sequencing kit (SQK-LSK114) and sequenced on a R10.4.1 nanopore
+PromethION flowcell (FLO-PRO114HD) with the “400 bp/s” mode (5khz
+sampling).
 
 ### Basecalling
 
@@ -157,6 +169,12 @@ hac and sup accuracy mode using the 4.0.0 and 4.1.0 models.
 
 The reads were basecalled using
 [dorado](https://github.com/nanoporetech/dorado) (v. 0.3.0) with fast,
+hac and sup accuracy mode using the 4.2.0 models.
+
+#### 5 khz High Duplex PromethION data
+
+The reads were basecalled using
+[dorado](https://github.com/nanoporetech/dorado) (v. 0.3.4) with fast,
 hac and sup accuracy mode using the 4.2.0 models.
 
 ### Read QC
