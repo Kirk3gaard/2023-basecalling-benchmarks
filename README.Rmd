@@ -53,9 +53,11 @@ Pod5 data:
 The data has been added to the ENA [PRJEB64570](https://www.ebi.ac.uk/ena/browser/view/PRJEB64570). (NCBI did not accept pod5 and told me they do not want to do that)
 
 ### 5 khz high duplex data
+The data has been added to the ENA [PRJEB65462](https://www.ebi.ac.uk/ena/browser/view/PRJEB65462)
 
 Fastq data:
-- upload ongoing
+- sup: [ERR11901474](https://www.ebi.ac.uk/ena/browser/view/ERR11901474)
+- sup duplex: [ERR11901475](https://www.ebi.ac.uk/ena/browser/view/ERR11901475)
 
 
 Pod5 data:

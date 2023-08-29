@@ -1,7 +1,7 @@
 README
 ================
 Rasmus Kirkegaard
-25 August, 2023
+29 August, 2023
 
 # R10.4.1 Zymo HMW basecalling
 
@@ -83,7 +83,13 @@ did not accept pod5 and told me they do not want to do that)
 
 ### 5 khz high duplex data
 
-Fastq data: - upload ongoing
+The data has been added to the ENA
+[PRJEB65462](https://www.ebi.ac.uk/ena/browser/view/PRJEB65462)
+
+Fastq data: - sup:
+[ERR11901474](https://www.ebi.ac.uk/ena/browser/view/ERR11901474) - sup
+duplex:
+[ERR11901475](https://www.ebi.ac.uk/ena/browser/view/ERR11901475)
 
 Pod5 data: - upload ongoing
 
