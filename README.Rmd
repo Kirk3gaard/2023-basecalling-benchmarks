@@ -61,7 +61,7 @@ Fastq data:
 
 
 Pod5 data:
-- upload ongoing
+- [ERR11924124](https://www.ebi.ac.uk/ena/browser/view/ERR11924124)
 
 ```{r load_libraries_and_data,echo=FALSE,warning=FALSE,message=FALSE}
 library(tidyverse)

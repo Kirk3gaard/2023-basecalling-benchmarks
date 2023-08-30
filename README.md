@@ -1,7 +1,7 @@
 README
 ================
 Rasmus Kirkegaard
-29 August, 2023
+30 August, 2023
 
 # R10.4.1 Zymo HMW basecalling
 
@@ -91,7 +91,8 @@ Fastq data: - sup:
 duplex:
 [ERR11901475](https://www.ebi.ac.uk/ena/browser/view/ERR11901475)
 
-Pod5 data: - upload ongoing
+Pod5 data: -
+[ERR11924124](https://www.ebi.ac.uk/ena/browser/view/ERR11924124)
 
 ## NP reads mapped to the refs overall (percent identity)
 
