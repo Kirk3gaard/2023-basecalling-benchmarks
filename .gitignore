@@ -1,6 +1,9 @@
 # folders
 data/
 temp/
+jobs/
+profile/
+slurm_logs/
 
 .snakemake/
 
