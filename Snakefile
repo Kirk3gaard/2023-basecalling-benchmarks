@@ -127,9 +127,11 @@ rule medaka1x:
         basecall_mode=$(echo {wildcards.npID} | sed -E 's/.*_([a-z]+)\@.*/\\1/')
         basecall_version=$(echo {wildcards.npID} | sed -E 's/.*_[a-z]+\@v(.*)-.*/\\1/')
         if [ "$basecall_mode" = "fast" ]; then
-            medaka_model="r1041_e82_400bps_fast_g632" # There does not appear to be a 4.0.0, 4.1.0 or 4.2.0 medaka model for fast mode
+            medaka_model="r1041_e82_400bps_fast_g632" # There does not appear to be a 4.0.0, 4.1.0, 4.2.0 or 4.3.0 medaka model for fast mode
         elif [ "$basecall_mode" = "supdup" ]; then
             medaka_model="r1041_e82_400bps_sup_v$basecall_version"
+        elif [ "$basecall_mode" = "hacdup" ]; then
+            medaka_model="r1041_e82_400bps_hac_v$basecall_version"
         else 
             medaka_model="r1041_e82_400bps_"$basecall_mode"_v$basecall_version"
         fi
@@ -150,16 +152,14 @@ rule extract_contigs:
         node_type="basic",
     shell:
         """
-        module load seqtk
         mkdir -p results/bins/
-        cat {input.asminfo} | cut -f 1 > {output}
+        tail -n +2 {input.asminfo} | cut -f 1 > {output}
         # Separate contigs as individual "bins" (https://twitter.com/lh3lh3/status/1453374559084765185)
         while read -r line;
         do
         echo $line > temp/{wildcards.npID}.{wildcards.asmtype}thisID
         seqtk subseq {input.asm} temp/{wildcards.npID}.{wildcards.asmtype}thisID | gzip > results/bins/{wildcards.npID}.{wildcards.asmtype}.$line.fa.gz
         done < {output}
-        module unload seqtk
         """
 
 rule split_quast_QC:

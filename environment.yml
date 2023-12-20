@@ -20,3 +20,4 @@ dependencies:
  - nanoplot
  - minimap2=2.24
  - bamtools=2.5.2
+ - bcftools=1.19
