@@ -175,6 +175,7 @@ rule split_quast_QC:
         node_type="basic",
     shell:
         """
+        ulimit -s 65536
         quast.py --threads {threads} --output-dir temp/quast_ref_{wildcards.refID} -r {input.ref} --no-plots --no-html results/bins/*.fa.gz {input.ref}
         cat temp/quast_ref_{wildcards.refID}/transposed_report.tsv > {output}
         """
@@ -192,6 +193,7 @@ rule split_ANI:
         node_type="basic",
     shell:
         """
+        ulimit -s 65536
         ls results/bins/*.fa.gz > temp/draft_genome_list.txt
         ls data/hmw_individual/*.fasta > temp/ref_genome_list.txt
         fastANI --threads {threads} --queryList temp/draft_genome_list.txt --refList temp/ref_genome_list.txt -o {output}
@@ -208,7 +210,7 @@ rule knitRMD:
         "README.md"
     threads: 4
     resources:
-        mem_mb=10000,
+        mem_mb=50000,
         node_type="basic",
     shell:
         """
