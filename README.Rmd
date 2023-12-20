@@ -107,6 +107,11 @@ NP_QC_fast_4.2.0<-get_read_QC(model = "dna_r10.4.1_e8.2_400bps_fast@v4.2.0")
 NP_QC_hac_4.2.0<-get_read_QC(model = "dna_r10.4.1_e8.2_400bps_hac@v4.2.0")
 NP_QC_sup_4.2.0<-get_read_QC(model = "dna_r10.4.1_e8.2_400bps_sup@v4.2.0")
 NP_QC_supdup_4.2.0<-get_read_QC(model = "dna_r10.4.1_e8.2_400bps_supdup@v4.2.0")
+NP_QC_fast_4.3.0<-get_read_QC(model = "dna_r10.4.1_e8.2_400bps_fast@v4.3.0")
+NP_QC_hac_4.3.0<-get_read_QC(model = "dna_r10.4.1_e8.2_400bps_hac@v4.3.0")
+NP_QC_hacdup_4.3.0<-get_read_QC(model = "dna_r10.4.1_e8.2_400bps_hacdup@v4.3.0")
+NP_QC_sup_4.3.0<-get_read_QC(model = "dna_r10.4.1_e8.2_400bps_sup@v4.3.0")
+NP_QC_supdup_4.3.0<-get_read_QC(model = "dna_r10.4.1_e8.2_400bps_supdup@v4.3.0")
 NP_QC_combined<-bind_rows(NP_QC_fast_4.0.0,
                           NP_QC_hac_4.0.0,
                           NP_QC_sup_4.0.0,
@@ -117,7 +122,12 @@ NP_QC_combined<-bind_rows(NP_QC_fast_4.0.0,
                           NP_QC_fast_4.2.0,
                           NP_QC_hac_4.2.0,
                           NP_QC_sup_4.2.0,
-                          NP_QC_supdup_4.2.0) %>%
+                          NP_QC_supdup_4.2.0,
+                          NP_QC_fast_4.3.0,
+                          NP_QC_hac_4.3.0,
+                          NP_QC_hacdup_4.3.0,
+                          NP_QC_sup_4.3.0,
+                          NP_QC_supdup_4.3.0) %>%
   mutate(model_version=gsub(x = model,pattern=".*@v(.*)",replacement = "\\1"),
          basecalling_model=gsub(x = model,pattern=".*bps_(.*)@v.*",replacement = "\\1"))
 
@@ -235,6 +245,32 @@ genome_stats %>%
   mutate(Sample_rate_model=case_when(model_version=="4.1.0"~paste0("4khz_",basecalling_model),
                                      model_version=="4.2.0"~paste0("5khz_",basecalling_model))) %>%
   ggplot(aes(x=coverage,y = `# mismatches per 100 kbp`,col=Sample_rate_model,shape=asmtype))+geom_point()+geom_line()+facet_wrap(~ref)+scale_y_log10()+coord_cartesian(xlim=c(0, 100))
+```
+
+
+## Model 4.2 vs 4.3
+
+### Indels
+
+
+
+```{r fig.width=10, echo=FALSE,warning=FALSE,message=FALSE}
+genome_stats %>% 
+  filter(basecalling_model!="fast") %>%
+  filter(model_version %in% c("4.2.0","4.3.0")) %>%
+  ggplot(aes(x=coverage,y = `# indels per 100 kbp`,col=model,shape=asmtype))+geom_point()+geom_line()+facet_wrap(~ref)+scale_y_log10()+coord_cartesian(xlim=c(0, 100))
+```
+
+### Mismatches
+
+
+
+```{r fig.width=10, echo=FALSE,warning=FALSE,message=FALSE}
+genome_stats %>% 
+  filter(basecalling_model!="fast") %>%
+  filter(model_version %in% c("4.2.0","4.3.0")) %>%
+  filter(!(model_version == "4.1.0" & basecalling_model=="hac")) %>%
+  ggplot(aes(x=coverage,y = `# mismatches per 100 kbp`,col=model,shape=asmtype))+geom_point()+geom_line()+facet_wrap(~ref)+scale_y_log10()+coord_cartesian(xlim=c(0, 100))
 ```
 
 ## Materials and methods

@@ -143,6 +143,16 @@ option for mismatches.
 
 ![](README_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
+## Model 4.2 vs 4.3
+
+### Indels
+
+![](README_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+
+### Mismatches
+
+![](README_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+
 ## Materials and methods
 
 Here is a brief description of the tools used. For the exact commands
