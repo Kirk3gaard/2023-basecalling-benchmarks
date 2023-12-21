@@ -188,6 +188,13 @@ genome_stats<-fastani %>% right_join(quast_tab,by = c("Assembly", "ref")) %>%
 NP_QC_combined %>% ggplot(aes(x = percentIdentity,col=basecalling_model))+geom_density()+geom_vline(xintercept = 99,col="red",linetype="dashed")+scale_x_continuous(breaks = 85:100)+coord_cartesian(xlim=c(85, 100))+xlab("Percent identity")+facet_wrap(~model_version,ncol = 1,scales = "free_y")
 ```
 
+## Longest perfect read
+
+```{r fig.width=10,fig.height=7,echo=FALSE,warning=FALSE,message=FALSE}
+NP_QC_combined %>% group_by(basecalling_model,model_version,REF) %>% filter(percentIdentity==100) %>% filter(lengths==aligned_lengths) %>% filter(lengths==max(aligned_lengths)) %>% 
+  ggplot(aes(x=lengths,y=model))+geom_point()+facet_wrap(~REF,ncol = 1)
+```
+
 ## NP reads mapped to the refs overall (phred scale)
 
 Phred scores for perfect matching reads are calculated as recommended by [Armin Topfer](https://twitter.com/kirk3gaard/status/1397457000217423873) which takes length into account.

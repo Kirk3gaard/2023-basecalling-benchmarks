@@ -111,6 +111,10 @@ Pod5 data: -
 
 ![](README_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
 
+## Longest perfect read
+
+![](README_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
+
 ## NP reads mapped to the refs overall (phred scale)
 
 Phred scores for perfect matching reads are calculated as recommended by
@@ -118,47 +122,47 @@ Phred scores for perfect matching reads are calculated as recommended by
 Topfer](https://twitter.com/kirk3gaard/status/1397457000217423873) which
 takes length into account.
 
-![](README_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
 
 ## Fast mode
 
 ### Indel rate vs coverage
 
-![](README_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
 ### Mismatch rate vs coverage
 
-![](README_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
 ## HAC mode
 
 ### Indel rate vs coverage
 
-![](README_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 ### Mismatch rate vs coverage
 
-![](README_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 ## SUP mode
 
 ### Indel rate vs coverage
 
-![](README_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
 ### Mismatch rate vs coverage
 
-![](README_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
 ## Duplex mode
 
 ### Indel rate vs coverage
 
-![](README_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
 ### Mismatch rate vs coverage
 
-![](README_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ## 4khz SUP vs 5 khz HAC & SUP
 
@@ -175,14 +179,14 @@ The indel rate seems to be higher with 5khz HAC than both SUP regardless
 of sample rate. Interestingly the 5khz sample rate with SUP performs
 much better than 4 khz SUP for some organisms but not S enterica.
 
-![](README_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
 ### Mismatches
 
 While HAC is on par with SUP for some organisms it is never the best
 option for mismatches.
 
-![](README_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
 ## Super accuracy comparison model 4.2 vs 4.3
 
@@ -201,11 +205,11 @@ tutorial”](https://github.com/rrwick/Perfect-bacterial-genome-tutorial/wiki).
 
 ### Indels
 
-![](README_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 ### Mismatches
 
-![](README_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
 ## Materials and methods
 
