@@ -190,7 +190,7 @@ NP_QC_combined %>% ggplot(aes(x = percentIdentity,col=basecalling_model))+geom_d
 
 ## Longest perfect read
 
-```{r fig.width=10,fig.height=7,echo=FALSE,warning=FALSE,message=FALSE}
+```{r fig.width=10,fig.height=30,echo=FALSE,warning=FALSE,message=FALSE}
 NP_QC_combined %>% group_by(basecalling_model,model_version,REF) %>% filter(percentIdentity==100) %>% filter(lengths==aligned_lengths) %>% filter(lengths==max(aligned_lengths)) %>% 
   ggplot(aes(x=lengths,y=model))+geom_point()+facet_wrap(~REF,ncol = 1)
 ```
