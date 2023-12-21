@@ -143,7 +143,7 @@ option for mismatches.
 
 ![](README_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
-## Model 4.2 vs 4.3
+## Super accuracy comparison model 4.2 vs 4.3
 
 ### Indels
 

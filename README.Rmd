@@ -248,15 +248,15 @@ genome_stats %>%
 ```
 
 
-## Model 4.2 vs 4.3
+## Super accuracy comparison model 4.2 vs 4.3
 
 ### Indels
 
 
-
 ```{r fig.width=10, echo=FALSE,warning=FALSE,message=FALSE}
 genome_stats %>% 
-  filter(basecalling_model!="fast") %>%
+  filter(basecalling_model %in% c("sup","supdup")) %>%
+  filter(asmtype=="flye") %>%
   filter(model_version %in% c("4.2.0","4.3.0")) %>%
   ggplot(aes(x=coverage,y = `# indels per 100 kbp`,col=model,shape=asmtype))+geom_point()+geom_line()+facet_wrap(~ref)+scale_y_log10()+coord_cartesian(xlim=c(0, 100))
 ```
@@ -267,7 +267,8 @@ genome_stats %>%
 
 ```{r fig.width=10, echo=FALSE,warning=FALSE,message=FALSE}
 genome_stats %>% 
-  filter(basecalling_model!="fast") %>%
+  filter(basecalling_model %in% c("sup","supdup")) %>%
+  filter(asmtype=="flye") %>%
   filter(model_version %in% c("4.2.0","4.3.0")) %>%
   filter(!(model_version == "4.1.0" & basecalling_model=="hac")) %>%
   ggplot(aes(x=coverage,y = `# mismatches per 100 kbp`,col=model,shape=asmtype))+geom_point()+geom_line()+facet_wrap(~ref)+scale_y_log10()+coord_cartesian(xlim=c(0, 100))
