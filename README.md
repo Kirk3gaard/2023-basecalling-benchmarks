@@ -1,7 +1,7 @@
 README
 ================
 Rasmus Kirkegaard
-20 December, 2023
+21 December, 2023
 
 # R10.4.1 Zymo HMW basecalling
 
@@ -52,6 +52,19 @@ performed.
     there is a similar pattern with some organisms being equally good
     and others where HAC is simply worse.
 5.  Duplex reads really represent a step change in single read accuracy
+
+I think it is work taking a moment to think about how amazing it is that
+we now have several independent methods (sequencing tech+assembler) that
+can reproduce a bacterial genome of e.g. P aeruginosa (6832199 bp) with
+error rates of less than 0.01 per 100 kbp \<2 total errors.
+
+Ending 2023 with nanopore data improving from their single strand data
+(simplex) barely hitting their Q20 goal to going well beyond it and when
+reading both stands (duplex) even racing beyond Q30 is quite amazing.
+Lots of innovation on run conditions and basecalling models. The promise
+of [Q30 single strand
+reads](https://x.com/iiSeymour/status/1732542416320643164?s=20) in 2024
+does not seem too far fetched.
 
 ## Data availability
 
@@ -107,17 +120,45 @@ takes length into account.
 
 ![](README_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
 
-## NP reads aligned to the refs (98-100 % identity)
+## Fast mode
+
+### Indel rate vs coverage
 
 ![](README_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
 
-## Indel rate vs coverage
+### Mismatch rate vs coverage
 
 ![](README_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
-## Mismatch rate vs coverage
+## HAC mode
+
+### Indel rate vs coverage
 
 ![](README_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+
+### Mismatch rate vs coverage
+
+![](README_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+
+## SUP mode
+
+### Indel rate vs coverage
+
+![](README_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+
+### Mismatch rate vs coverage
+
+![](README_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+
+## Duplex mode
+
+### Indel rate vs coverage
+
+![](README_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+
+### Mismatch rate vs coverage
+
+![](README_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
 ## 4khz SUP vs 5 khz HAC & SUP
 
@@ -134,24 +175,37 @@ The indel rate seems to be higher with 5khz HAC than both SUP regardless
 of sample rate. Interestingly the 5khz sample rate with SUP performs
 much better than 4 khz SUP for some organisms but not S enterica.
 
-![](README_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ### Mismatches
 
 While HAC is on par with SUP for some organisms it is never the best
 option for mismatches.
 
-![](README_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
 ## Super accuracy comparison model 4.2 vs 4.3
 
+The 4.3 model includes some modifications found in bacteria and it seems
+to pay off. The model gives a clear improvement for the consensus
+accuracy across many of the genomes. Indel rates without any polishing
+ranging from below 0.01 to 1 per 100 kbp translates to 1-100 errors for
+a 10 Mbp genome. Similar levels were achieved regarding mismatches. The
+Bacillus showed notably poorer consensus accuracy than the others which
+I assume could be due to some real differences or errors in the Pacbio
+HiFi based references.When we are getting in the 0.01-0.1 errors per 100
+kbp I assume that it gets difficult to tell whether they are actual
+errors without hand curating reference genomes with multiple independent
+technologies as per [Ryan Wicks “Perfect bacterial genome
+tutorial”](https://github.com/rrwick/Perfect-bacterial-genome-tutorial/wiki).
+
 ### Indels
 
-![](README_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
 ### Mismatches
 
-![](README_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 ## Materials and methods
 
@@ -192,7 +246,9 @@ hac and sup accuracy mode using the 4.2.0 models.
 
 The reads were basecalled using
 [dorado](https://github.com/nanoporetech/dorado) (v. 0.3.4) with fast,
-hac and sup accuracy mode using the 4.2.0 models.
+hac and sup accuracy mode using the 4.2.0 models. The reads were
+basecalled using [dorado](https://github.com/nanoporetech/dorado) (v.
+0.5.0) with fast, hac and sup accuracy mode using the 4.3.0 models.
 
 ### Read QC
 
@@ -206,7 +262,7 @@ public soon) using [minimap2](https://github.com/lh3/minimap2) (v.
 The reads were subsampled using [seqtk](https://github.com/lh3/seqtk)
 (v. 1.3) and assembled using [flye](https://github.com/fenderglass/Flye)
 (v. 2.9.1). The metagenome assemblies were then polished using
-[medaka](https://github.com/nanoporetech/medaka) (v. 1.8.0).
+[medaka](https://github.com/nanoporetech/medaka) (v. 1.11.3).
 
 ### Genome quality assessment
 

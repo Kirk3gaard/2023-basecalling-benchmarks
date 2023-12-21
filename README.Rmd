@@ -30,6 +30,10 @@ With the release of R10.4.1 I wanted to check the quality of the raw reads and t
 4. HAC data shows a serious improvement on raw read accuracy compared to 4khz sampling. However, it is still inferior to the 4khz SUP data on this metric. For assemblies the consensus is on par with 4 khz sup for some organisms but generally slightly worse. For mismatches there is a similar pattern with some organisms being equally good and others where HAC is simply worse.
 5. Duplex reads really represent a step change in single read accuracy
 
+I think it is work taking a moment to think about how amazing it is that we now have several independent methods (sequencing tech+assembler) that can reproduce a bacterial genome of e.g. P aeruginosa (6832199 bp) with error rates of less than 0.01 per 100 kbp <2 total errors. 
+
+Ending 2023 with nanopore data improving from their single strand data (simplex) barely hitting their Q20 goal to going well beyond it and when reading both stands (duplex) even racing beyond Q30 is quite amazing. Lots of innovation on run conditions and basecalling models. The promise of [Q30 single strand reads](https://x.com/iiSeymour/status/1732542416320643164?s=20) in 2024 does not seem too far fetched. 
+
 ## Data availability
 
 ### 4 khz data
@@ -195,23 +199,75 @@ NP_QC_combined %>%
   ggplot(aes(x = Phred,col=basecalling_model))+geom_density()+geom_vline(xintercept = 20,col="red",linetype="dashed")+xlab("Phred score (Q)")+facet_wrap(~model_version,ncol = 1)
 ```
 
-## NP reads aligned to the refs (98-100 % identity)
+## Fast mode
 
-```{r fig.width=10,fig.height=7,echo=FALSE,warning=FALSE,message=FALSE}
-NP_QC_combined %>% ggplot(aes(x = percentIdentity,col=REF))+geom_density()+geom_vline(xintercept = 99,col="red",linetype="dashed")+geom_vline(xintercept = 99.9,col="red",linetype="dashed")+facet_wrap(~model,ncol = 1,scales = "free_y")+coord_cartesian(xlim=c(98, 100))+scale_x_continuous(breaks = seq(98,100,0.1))+xlab("Percent identity")
-```
-
-## Indel rate vs coverage
+### Indel rate vs coverage
 
 ```{r fig.width=10, echo=FALSE,warning=FALSE,message=FALSE}
 genome_stats %>% 
+  filter(basecalling_model=="fast") %>%
   ggplot(aes(x=coverage,y = `# indels per 100 kbp`,col=model,shape=asmtype))+geom_point()+geom_line()+facet_wrap(~ref)+scale_y_log10()+coord_cartesian(xlim=c(0, 100))
 ```
 
-## Mismatch rate vs coverage
+### Mismatch rate vs coverage
 
 ```{r fig.width=10, echo=FALSE,warning=FALSE,message=FALSE}
 genome_stats %>% 
+  filter(basecalling_model=="fast") %>%
+  ggplot(aes(x=coverage,y = `# mismatches per 100 kbp`,col=model,shape=asmtype))+geom_point()+geom_line()+facet_wrap(~ref)+scale_y_log10()+coord_cartesian(xlim=c(0, 100))
+```
+
+## HAC mode
+
+### Indel rate vs coverage
+
+```{r fig.width=10, echo=FALSE,warning=FALSE,message=FALSE}
+genome_stats %>% 
+  filter(basecalling_model=="hac") %>%
+  ggplot(aes(x=coverage,y = `# indels per 100 kbp`,col=model,shape=asmtype))+geom_point()+geom_line()+facet_wrap(~ref)+scale_y_log10()+coord_cartesian(xlim=c(0, 100))
+```
+
+### Mismatch rate vs coverage
+
+```{r fig.width=10, echo=FALSE,warning=FALSE,message=FALSE}
+genome_stats %>% 
+  filter(basecalling_model=="hac") %>%
+  ggplot(aes(x=coverage,y = `# mismatches per 100 kbp`,col=model,shape=asmtype))+geom_point()+geom_line()+facet_wrap(~ref)+scale_y_log10()+coord_cartesian(xlim=c(0, 100))
+```
+
+## SUP mode
+
+### Indel rate vs coverage
+
+```{r fig.width=10, echo=FALSE,warning=FALSE,message=FALSE}
+genome_stats %>% 
+  filter(basecalling_model=="sup") %>%
+  ggplot(aes(x=coverage,y = `# indels per 100 kbp`,col=model,shape=asmtype))+geom_point()+geom_line()+facet_wrap(~ref)+scale_y_log10()+coord_cartesian(xlim=c(0, 100))
+```
+
+### Mismatch rate vs coverage
+
+```{r fig.width=10, echo=FALSE,warning=FALSE,message=FALSE}
+genome_stats %>% 
+  filter(basecalling_model=="sup") %>%
+  ggplot(aes(x=coverage,y = `# mismatches per 100 kbp`,col=model,shape=asmtype))+geom_point()+geom_line()+facet_wrap(~ref)+scale_y_log10()+coord_cartesian(xlim=c(0, 100))
+```
+
+## Duplex mode
+
+### Indel rate vs coverage
+
+```{r fig.width=10, echo=FALSE,warning=FALSE,message=FALSE}
+genome_stats %>% 
+  filter(basecalling_model %in% c("hacdup","supdup")) %>%
+  ggplot(aes(x=coverage,y = `# indels per 100 kbp`,col=model,shape=asmtype))+geom_point()+geom_line()+facet_wrap(~ref)+scale_y_log10()+coord_cartesian(xlim=c(0, 100))
+```
+
+### Mismatch rate vs coverage
+
+```{r fig.width=10, echo=FALSE,warning=FALSE,message=FALSE}
+genome_stats %>% 
+  filter(basecalling_model %in% c("hacdup","supdup")) %>%
   ggplot(aes(x=coverage,y = `# mismatches per 100 kbp`,col=model,shape=asmtype))+geom_point()+geom_line()+facet_wrap(~ref)+scale_y_log10()+coord_cartesian(xlim=c(0, 100))
 ```
 
@@ -249,6 +305,9 @@ genome_stats %>%
 
 
 ## Super accuracy comparison model 4.2 vs 4.3
+
+The 4.3 model includes some modifications found in bacteria and it seems to pay off. The model gives a clear improvement for the consensus accuracy across many of the genomes. Indel rates without any polishing ranging from below 0.01 to 1 per 100 kbp translates to 1-100 errors for a 10 Mbp genome. Similar levels were achieved regarding mismatches. The Bacillus showed notably poorer consensus accuracy than the others which I assume could be due to some real differences or errors in the Pacbio HiFi based references.When we are getting in the 0.01-0.1 errors per 100 kbp I assume that it gets difficult to tell whether they are actual errors without hand curating reference genomes with multiple independent technologies as per [Ryan Wicks "Perfect bacterial genome tutorial"](https://github.com/rrwick/Perfect-bacterial-genome-tutorial/wiki). 
+
 
 ### Indels
 
@@ -289,13 +348,13 @@ The reads were basecalled using [dorado](https://github.com/nanoporetech/dorado)
 The reads were basecalled using [dorado](https://github.com/nanoporetech/dorado) (v. 0.3.0) with fast, hac and sup accuracy mode using the 4.2.0 models. 
 
 #### 5 khz High Duplex PromethION data
-The reads were basecalled using [dorado](https://github.com/nanoporetech/dorado) (v. 0.3.4) with fast, hac and sup accuracy mode using the 4.2.0 models. 
+The reads were basecalled using [dorado](https://github.com/nanoporetech/dorado) (v. 0.3.4) with fast, hac and sup accuracy mode using the 4.2.0 models. The reads were basecalled using [dorado](https://github.com/nanoporetech/dorado) (v. 0.5.0) with fast, hac and sup accuracy mode using the 4.3.0 models. 
 
 ### Read QC
 Reads were mapped to the updated zymo reference genomes (hopefully goes public soon) using [minimap2](https://github.com/lh3/minimap2) (v. 2.24), and QC information was obtained using [NanoPlot](https://github.com/wdecoster/NanoPlot) (v. 1.41.0).
 
 ### Assembly
-The reads were subsampled using [seqtk](https://github.com/lh3/seqtk) (v. 1.3) and assembled using [flye](https://github.com/fenderglass/Flye) (v. 2.9.1). The metagenome assemblies were then polished using [medaka](https://github.com/nanoporetech/medaka) (v. 1.8.0).
+The reads were subsampled using [seqtk](https://github.com/lh3/seqtk) (v. 1.3) and assembled using [flye](https://github.com/fenderglass/Flye) (v. 2.9.1). The metagenome assemblies were then polished using [medaka](https://github.com/nanoporetech/medaka) (v. 1.11.3).
 
 ### Genome quality assessment
 The assembled contigs were compared to the reference contigs using [QUAST](https://github.com/ablab/quast) (v. 5.2.0) and [fastANI](https://github.com/ParBLiSS/FastANI) (v. 1.33).
