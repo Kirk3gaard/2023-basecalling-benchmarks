@@ -197,11 +197,16 @@ NP_QC_combined %>% group_by(basecalling_model,model_version,REF) %>% filter(perc
 
 ## NP reads mapped to the refs overall (phred scale)
 
-Phred scores for perfect matching reads are calculated as recommended by [Armin Topfer](https://twitter.com/kirk3gaard/status/1397457000217423873) which takes length into account.
+Phred scores for perfect matching reads are calculated as recommended by [Armin Topfer](https://twitter.com/kirk3gaard/status/1397457000217423873) which takes length into account by adjusting the percent identity value 100*(1-1/(length+1)). This implies that a perfect read of 100 bp will achieve a phred score of ~20, while 1000 bp caps out at ~30 etc. So forget about your shor reads being Q40. 
 
 ```{r fig.width=10,fig.height=7,echo=FALSE,warning=FALSE,message=FALSE}
+PHREDNORMPERFECT=function(length=10) {
+  adj_percentidentity<-100*(1-1/(length+1))
+  phred<--10*log10((100-adj_percentidentity)/100)
+  return(phred)
+}
 NP_QC_combined %>% 
-  mutate(Phred=case_when(percentIdentity==100~1-1/(lengths+1),
+  mutate(Phred=case_when(percentIdentity==100~PHREDNORMPERFECT(length=lengths),
                          TRUE~-10*log10((100-percentIdentity)/100))) %>%
   ggplot(aes(x = Phred,col=basecalling_model))+geom_density()+geom_vline(xintercept = 20,col="red",linetype="dashed")+xlab("Phred score (Q)")+facet_wrap(~model_version,ncol = 1)
 ```
